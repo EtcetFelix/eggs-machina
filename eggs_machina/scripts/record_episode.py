@@ -7,6 +7,12 @@ from eggs_machina.constants import (
     DELTA_TIME_STEP,
     TASK_CONFIGS,
 )
+from eggs_machina.utils.data_utils import (
+    create_dataset_path,
+    prepare_data_for_export,
+    save_to_hdf5,
+)
+from eggs_machina.utils.env_utils import make_real_env
 
 TASK_CONFIG = TASK_CONFIGS["crack_an_egg"]
 
@@ -38,6 +44,23 @@ def get_auto_index(dataset_dir, dataset_name_prefix="", data_suffix="hdf5"):
     raise Exception(f"Error getting auto index, or more than {max_idx} episodes")
 
 
+def loop_timesteps(env, max_timesteps):
+    timestep = env.reset(fake=True)
+    timesteps = [timestep]
+    actions = []
+    actual_dt_history = []
+    for _ in tqdm(range(max_timesteps)):
+        t0 = time.time()
+        user_action = env.get_action()
+        t1 = time.time()
+        timestep = env.step(user_action)
+        t2 = time.time()
+        timesteps.append(timestep)
+        actions.append(user_action)
+        actual_dt_history.append([t0, t1, t2])
+    return actual_dt_history, actions, timesteps
+
+
 def capture_one_episode(
     dt,
     max_timesteps: int,
@@ -46,7 +69,15 @@ def capture_one_episode(
     dataset_name: str,
     overwrite: bool,
 ):
-    pass
+    dataset_path = create_dataset_path(dataset_dir, dataset_name + ".hdf5", overwrite)
+    env = make_real_env([], setup_robots=False)
+    actual_dt_history, actions, timesteps = loop_timesteps(env, max_timesteps)
+
+    data_dict = prepare_data_for_export(camera_names, actions, timesteps)
+
+    save_to_hdf5(data_dict, dataset_path, camera_names, max_timesteps)
+
+    return True
 
 
 def main():
