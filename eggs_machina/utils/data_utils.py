@@ -3,7 +3,8 @@ import time
 from typing import Any, Dict, List
 
 import h5py
-from minialoha.utils.constants import NUM_JOINTS_ON_ROBOT, NUM_LEADER_ROBOTS
+
+from eggs_machina.constants import NUM_JOINTS_ON_ROBOT, NUM_LEADER_ROBOTS
 
 TOTAL_NUM_LEADER_JOINTS = NUM_LEADER_ROBOTS * NUM_JOINTS_ON_ROBOT
 

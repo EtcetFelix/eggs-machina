@@ -12,3 +12,9 @@ TASK_CONFIGS = {
         "camera_names": [],
     },
 }
+
+NUM_JOINTS_ON_ROBOT = 3
+NUM_LEADER_ROBOTS = 1
+
+GRIPPER_INDEX = None  # TODO: Set this to something
+PUPPET_GRIPPER_POSITION_NORMALIZE_FN = None  # TODO: Set this to something
