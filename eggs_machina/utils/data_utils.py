@@ -73,5 +73,5 @@ def save_to_hdf5(
 
         for name, array in data_dict.items():
             dataset = root[name]
-            dataset[...] = array
+            dataset[...] = array # type: ignore
     print(f"Saving: {time.time() - t0:.1f} secs")
