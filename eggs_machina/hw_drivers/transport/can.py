@@ -10,10 +10,9 @@ class CAN_ID_Type(Enum):
     EXTENDED = 1
 @dataclass
 class CAN_Message:
-    can_id: bytes
+    can_id: int
     data_len: int
     data: bytes
-    can_id_type: CAN_ID_Type
     
 class CAN_Baud_Rate(Enum):
     CAN_BAUD_125_KBS = 1
@@ -40,9 +39,14 @@ class PCAN(Transport):
     def recv(self, can_id: int, timeout_s: int) -> CAN_Message:
         end_time = time.time() + timeout_s
         while time.time() < end_time:
-            status, msg, timestamp = self.transport.Read(self.channel)
+            # returns tuple of status, msg, timestamp
+            _, msg, _ = self.transport.Read(self.channel)
             if msg.ID == can_id:
-                return CAN_Message(can_id=msg.ID, data_len=msg.LEN, data=msg.DATA)
+                return CAN_Message(
+                    can_id=int(msg.ID), 
+                    data_len=int(msg.LEN), 
+                    data=bytes(msg.DATA)
+                )
         return None
         
     def send(self, can_id: int, data: bytes) -> bool:
