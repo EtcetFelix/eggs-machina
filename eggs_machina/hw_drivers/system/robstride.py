@@ -4,6 +4,7 @@ from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import CAN_Message
 
 
+
 class Robstride_Msg_Type(Enum):
     DEVICE_ID = 0
     MOTOR_CTRL = 1
@@ -17,12 +18,20 @@ class Robstride_Msg_Type(Enum):
     FAULT_FEEDBACK = 21
     BAUD_RATE_CHANGE = 22
 
-
 class Robstride:
     def __init__(self, host_can_id: int, motor_can_id: int, can_transport: Transport):
         self.host_can_id = host_can_id
         self.motor_can_id = motor_can_id
         self.can_transport = can_transport
+
+    def get_device_id(self):
+        self._send_frame(
+            msg_type=Robstride_Msg_Type.DEVICE_ID, 
+            data=bytes([0, 0, 0, 0, 0, 0, 0, 0]),
+            is_extended_id=True,
+        )
+        response_can_id = 0xFE | (self.motor_can_id << 8)
+        return self._read_frame(can_id=response_can_id, is_extended_id=True)
 
     def _send_frame(self, msg_type: Robstride_Msg_Type, data: bytes):
         extended_can_id = self.motor_can_id | (self.host_can_id << 8) | (msg_type.value << 24)

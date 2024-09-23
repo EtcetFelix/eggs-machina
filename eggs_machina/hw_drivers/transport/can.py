@@ -36,12 +36,15 @@ class PCAN(Transport):
         self.transport = PCANBasic()
         self.transport.Initialize(channel, pcan_baud_rate)
 
-    def recv(self, can_id: int, timeout_s: int) -> CAN_Message:
+    def recv(self, can_id: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> CAN_Message:
+        msg_type = PCANBasic.PCAN_MESSAGE_STANDARD
+        if is_extended_id:
+            msg_type = PCANBasic.PCAN_MESSAGE_EXTENDED
         end_time = time.time() + timeout_s
         while time.time() < end_time:
             # returns tuple of status, msg, timestamp
             _, msg, _ = self.transport.Read(self.channel)
-            if msg.ID == can_id:
+            if int(msg.ID) == can_id and msg.MSGTYPE == msg_type:
                 return CAN_Message(
                     can_id=int(msg.ID), 
                     data_len=int(msg.LEN), 
@@ -49,11 +52,11 @@ class PCAN(Transport):
                 )
         return None
         
-    def send(self, can_id: int, data: bytes) -> bool:
+    def send(self, can_id: int, data: bytes, is_extended_id: bool = False) -> bool:
         msg = PCANBasic.TPCANMsg()
         msg.ID = can_id
         msg.MSGTYPE = PCANBasic.PCAN_MESSAGE_STANDARD
-        if can_id > 0x7FF:
+        if is_extended_id:
             msg.MSGTYPE = PCANBasic.PCAN_MESSAGE_EXTENDED
         msg.LEN = len(data)
         msg.DATA = data
