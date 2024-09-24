@@ -33,7 +33,7 @@ class PCAN(Transport):
         elif baud_rate == CAN_Baud_Rate.CAN_BAUD_500_KBS:
             pcan_baud_rate = PCANBasic.PCAN_BAUD_500K
 
-        self.transport = PCANBasic()
+        self.transport = PCANBasic.PCANBasic()
         self.transport.Initialize(channel, pcan_baud_rate)
 
     def recv(self, can_id: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> CAN_Message:
