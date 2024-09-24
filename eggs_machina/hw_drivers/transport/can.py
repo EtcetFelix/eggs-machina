@@ -47,7 +47,7 @@ class PCAN(Transport):
             status, msg, _ = self.transport.Read(self.channel)
             if status != PCANBasic.PCAN_ERROR_OK:
                 continue
-            if int(msg.ID) == can_id and msg.MSGTYPE == msg_type:
+            if int(msg.ID) == can_id and msg.MSGTYPE == msg_type.value:
                 return CAN_Message(
                     can_id=int(msg.ID),
                     data_len=int(msg.LEN),

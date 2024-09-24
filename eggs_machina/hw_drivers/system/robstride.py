@@ -35,7 +35,6 @@ class Robstride:
 
     def _send_frame(self, msg_type: Robstride_Msg_Type, data: bytes):
         extended_can_id = self.motor_can_id | (self.host_can_id << 8) | (msg_type.value << 24)
-        print(f"sending with can_id: {extended_can_id}")
         self.can_transport.send(can_id=extended_can_id, data=data, is_extended_id=True)
 
     def _read_frame(self, msg_id: int, timeout_s: int = 1) -> bytes:
