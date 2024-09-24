@@ -1,3 +1,4 @@
+from ctypes import *
 from dataclasses import dataclass
 from enum import Enum
 import time
@@ -43,11 +44,13 @@ class PCAN(Transport):
         end_time = time.time() + timeout_s
         while time.time() < end_time:
             # returns tuple of status, msg, timestamp
-            _, msg, _ = self.transport.Read(self.channel)
+            status, msg, _ = self.transport.Read(self.channel)
+            if status != PCANBasic.PCAN_ERROR_OK:
+                continue
             if int(msg.ID) == can_id and msg.MSGTYPE == msg_type:
                 return CAN_Message(
-                    can_id=int(msg.ID), 
-                    data_len=int(msg.LEN), 
+                    can_id=int(msg.ID),
+                    data_len=int(msg.LEN),
                     data=bytes(msg.DATA)
                 )
         return None
@@ -59,9 +62,12 @@ class PCAN(Transport):
         if is_extended_id:
             msg.MSGTYPE = PCANBasic.PCAN_MESSAGE_EXTENDED
         msg.LEN = len(data)
-        msg.DATA = data
+        ubyte_data_array = c_ubyte * 8
+        msg.DATA = ubyte_data_array(*data)
         try:
-            self.transport.Write(self.channel, msg)
+            status = self.transport.Write(self.channel, msg)
+            if status != PCANBasic.PCAN_ERROR_OK:
+                raise
         except:
             print(f"Failed to write CAN-ID: {can_id}")
             return False

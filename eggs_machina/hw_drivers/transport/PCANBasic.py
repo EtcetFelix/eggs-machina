@@ -403,7 +403,7 @@ class PCANBasic:
             # is a third-party software creaded and mantained by the MacCAN project. For
             # information and support, please contact MacCAN (info@mac-can).
             #
-           self.__m_dllBasic = cdll.LoadLibrary("libPCBUSB.dylib")
+           self.__m_dllBasic = cdll.LoadLibrary("/usr/local/lib/libPCBUSB.dylib")
 
         if self.__m_dllBasic == None:
             print ("Exception: The PCAN-Basic DLL couldn't be loaded!")
