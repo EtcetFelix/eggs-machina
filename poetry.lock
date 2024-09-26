@@ -84,6 +84,20 @@ files = [
 tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipython", "littleutils", "pytest", "rich"]
 
 [[package]]
+name = "gs-usb"
+version = "0.3.0"
+description = "Python Windows/Linux/Mac CAN driver based on usbfs or WinUSB WCID for Geschwister Schneider USB/CAN devices and candleLight USB CAN interfaces."
+optional = false
+python-versions = "*"
+files = [
+    {file = "gs_usb-0.3.0-py2.py3-none-any.whl", hash = "sha256:b7e5c8a367262fc2ca5f13f33bdc56e3b76b3dc01e0b8eeb82183dfb9b34312f"},
+    {file = "gs_usb-0.3.0.tar.gz", hash = "sha256:1f488fd7cd09d753dff74b7d05349f07933dc556844e3cd9df02c4e4b746bf8f"},
+]
+
+[package.dependencies]
+pyusb = ">=1.0.2"
+
+[[package]]
 name = "h5py"
 version = "3.11.0"
 description = "Read and write HDF5 files from Python"
@@ -419,6 +433,17 @@ pytest = ">=6.2.5"
 dev = ["pre-commit", "pytest-asyncio", "tox"]
 
 [[package]]
+name = "pyusb"
+version = "1.2.1"
+description = "Python USB access module"
+optional = false
+python-versions = ">=3.6.0"
+files = [
+    {file = "pyusb-1.2.1-py3-none-any.whl", hash = "sha256:2b4c7cb86dbadf044dfb9d3a4ff69fd217013dbe78a792177a3feb172449ea36"},
+    {file = "pyusb-1.2.1.tar.gz", hash = "sha256:a4cc7404a203144754164b8b40994e2849fde1cfff06b08492f12fff9d9de7b9"},
+]
+
+[[package]]
 name = "ruff"
 version = "0.6.7"
 description = "An extremely fast Python linter and code formatter, written in Rust."
@@ -515,4 +540,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "b155d5b15123e188829a3adfe4c095ee28851e1175ef7aecc344e3d45320b253"
+content-hash = "d7b1963d825a6ca9b0395d055f25950454f48d1289f9c219153ac43155218970"
