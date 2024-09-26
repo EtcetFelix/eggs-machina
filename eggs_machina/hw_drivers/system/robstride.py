@@ -2,7 +2,7 @@ from enum import Enum
 
 from eggs_machina.hw_drivers.transport import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
-from eggs_machina.hw_drivers.transport import can
+from eggs_machina.hw_drivers.transport import can_transport
 
 
 
@@ -38,12 +38,12 @@ class Robstride:
         self.can_transport.send(can_id=extended_can_id, data=data, is_extended_id=True)
 
     def _read_frame(self, msg_id: int, timeout_s: int = 1) -> bytes:
-        message: can.CAN_Message = self.can_transport.recv(can_id=msg_id, is_extended_id=True, timeout_s=timeout_s)
+        message: can_transport.CAN_Message = self.can_transport.recv(can_id=msg_id, is_extended_id=True, timeout_s=timeout_s)
         if message != None:
             return message.data
 
 if __name__ == "__main__":
-    pcan_transport = can.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can.CAN_Baud_Rate.CAN_BAUD_1_MBS)
+    pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
     
     robstride = Robstride(host_can_id=0xFD, motor_can_id=0x7F, can_transport=pcan_transport)
     device_id = robstride.get_device_id()
