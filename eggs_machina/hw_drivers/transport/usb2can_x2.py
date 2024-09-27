@@ -13,13 +13,13 @@ class CAN_Message:
     data: bytes
 
 class USB2CANX2(Transport):
-    def __init__(self, baud_rate: int):
-        os.system('sudo ifconfig can0 down')
-        os.system('sudo ip link set can0 type can bitrate 1000000')
-        os.system("sudo ifconfig can0 txqueuelen 100000")
-        os.system('sudo ifconfig can0 up')
+    def __init__(self, channel: str, baud_rate: int):
+        os.system(f'sudo ifconfig {channel} down')
+        os.system(f'sudo ip link set {channel} type can bitrate {baud_rate}')
+        os.system(f"sudo ifconfig {channel} txqueuelen {baud_rate}")
+        os.system(f'sudo ifconfig {channel} up')
         self.baud_rate = baud_rate
-        self.bus = can.interface.Bus(channel = 'can0', interface = 'socketcan')
+        self.bus = can.interface.Bus(channel = channel, interface = 'socketcan')
         
 
     def recv(self, can_id: int, is_extended_id: bool, timeout_s: int, *args, **kwargs) -> any:
@@ -46,6 +46,6 @@ class USB2CANX2(Transport):
         return True
 
 if __name__ == "__main__":
-    usb2can = USB2CANX2(baud_rate=10000)
+    usb2can = USB2CANX2(channel="can0", baud_rate=10000)
     usb2can.send(can_id=1,data=bytes([0, 0, 0, 0, 0, 0, 0, 0]), is_extended_id=True)
     os.system('sudo ifconfig can0 down')
