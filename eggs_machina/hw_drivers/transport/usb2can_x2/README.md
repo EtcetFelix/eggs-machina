@@ -2,6 +2,7 @@ Not compatible with python on windows, you'd have to build your own driver or fi
 
 *WSL on windows:*
 * Install wsl
+* Install usbipd on windows: https://blog.golioth.io/program-mcu-from-wsl2-with-usb-support/
 * You must now enable socketcan on wsl. Follow these directions:
 https://gist.github.com/yonatanh20/664f07d62eb028db18aa98b00afae5a6
 * Also, enable the Geschwister Schneider UG interfaces usb drivers by following these directions (you'll have to rebuild the wsl linux kernel again if you didn't do this in the previous step):
