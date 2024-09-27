@@ -44,6 +44,12 @@ class USB2CANX2(Transport):
             print(f"Failed to write CAN-ID: {can_id}")
             return False
         return True
+    
+    def open_channel(self, channel: str):
+        os.system(f'sudo ifconfig {channel} up')
+
+    def close_channel(self, channel: str): 
+        os.system(f'sudo ifconfig {channel} down')
 
 if __name__ == "__main__":
     usb2can = USB2CANX2(channel="can0", baud_rate=10000)
