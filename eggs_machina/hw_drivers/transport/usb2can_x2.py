@@ -17,13 +17,16 @@ class USB2CANX2(Transport):
     def recv(self, can_id: int, is_extended_id: bool, timeout_s: int, *args, **kwargs) -> any:
         pass
 
-    # def send(self, can_id: int, data: bytes, is_extended_id: bool, *args, **kwargs) -> any:
-    def send(self, can_id: int, is_extended_id: bool, *args, **kwargs) -> any:
-
-        msg = can.Message(arbitration_id=0x123, data=[0,1,2,3,4,5,6,7])
-        self.bus.send(msg)
+    def send(self, can_id: int, data: bytes, is_extended_id: bool, *args, **kwargs) -> bool:
+        msg = can.Message(arbitration_id=can_id, data=data, is_extended_id=is_extended_id)
+        try:
+            self.bus.send(msg)
+        except:
+            print(f"Failed to write CAN-ID: {can_id}")
+            return False
+        return True
 
 if __name__ == "__main__":
     usb2can = USB2CANX2(baud_rate=10000)
-    usb2can.send(1,True)
+    usb2can.send(can_id=1,data=bytes([0, 0, 0, 0, 0, 0, 0, 0]), is_extended_id=True)
     os.system('sudo ifconfig can0 down')
