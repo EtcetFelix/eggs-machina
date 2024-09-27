@@ -9,11 +9,11 @@ readme = "README.md"
 python = "^3.12"
 numpy = "^2.1.1"
 h5py = "^3.11.0"
+python-can = "^4.4.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.0.0"
 pytest-mock = "*"
-ipython = "*"
 ruff = "^0.6.5"
 
 [build-system]
