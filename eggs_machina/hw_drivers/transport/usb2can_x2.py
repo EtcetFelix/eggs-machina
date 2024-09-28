@@ -28,6 +28,8 @@ class USB2CANX2(Transport):
         while time.time() < end_time:
             with can.interface.Bus(channel=self.channel, interface=self.interface) as bus:
                 for msg in bus:
+                    if time.time() >= end_time:
+                        break
                     if int(msg.arbitration_id) == can_id:
                         return CAN_Message(
                             can_id=int(msg.arbitration_id),
