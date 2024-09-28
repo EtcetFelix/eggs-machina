@@ -19,14 +19,17 @@ class USB2CANX2(Transport):
         os.system(f"sudo ifconfig {channel} txqueuelen {baud_rate}")
         os.system(f'sudo ifconfig {channel} up')
         self.baud_rate = baud_rate
-        self.bus = can.interface.Bus(channel = channel, interface = 'socketcan')
+        self.channel = channel
+        self.interface = 'socketcan'
         
 
     def recv(self, can_id: int, is_extended_id: bool, timeout_s: int, *args, **kwargs) -> any:
         end_time = time.time() + timeout_s
         while time.time() < end_time:
-            with self.bus as bus:
+            with can.interface.Bus(channel=self.channel, interface=self.interface) as bus:
                 for msg in bus:
+                    if time.time() >= end_time:
+                        break
                     if int(msg.arbitration_id) == can_id:
                         return CAN_Message(
                             can_id=int(msg.arbitration_id),
@@ -37,12 +40,13 @@ class USB2CANX2(Transport):
 
 
     def send(self, can_id: int, data: bytes, is_extended_id: bool, *args, **kwargs) -> bool:
-        msg = can.Message(arbitration_id=can_id, data=data, is_extended_id=is_extended_id)
-        try:
-            self.bus.send(msg)
-        except:
-            print(f"Failed to write CAN-ID: {can_id}")
-            return False
+        with can.interface.Bus(channel=self.channel, interface=self.interface) as bus:
+            msg = can.Message(arbitration_id=can_id, data=data, is_extended_id=is_extended_id)
+            try:
+                bus.send(msg)
+            except:
+                print(f"Failed to write CAN-ID: {can_id}")
+                return False
         return True
     
     def open_channel(self, channel: str):
