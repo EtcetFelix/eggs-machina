@@ -29,6 +29,18 @@ class Robstride_Fault_Enum(Enum):
     FAULT_OVERCURRENT = 4
     FAULT_UNDERVOLTAGE = 5
 
+class Robstride_Fault_Frame_Enum(Enum):
+    OVER_TEMPERATURE_FAULT  = 0
+    DRIVER_CHIP_FAULT = 1
+    UNDER_VOLTAGE_FAULT = 2
+    OVER_VOLTAGE_FAULT = 3
+    B_PHASE_OVERCURRENT = 4
+    C_PHASE_OVERCURRENT = 5
+    ENC_NOT_CALIBRATED = 7
+    OVERLOAD_FAULT = 8
+    A_PHASE_OVERCURRENT = 16
+    OVER_TEMPERATURE_WARNING = 17
+
 @dataclass
 class FeedbackResp:
     errors: List[Robstride_Fault_Enum]

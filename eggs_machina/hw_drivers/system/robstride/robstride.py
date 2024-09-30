@@ -3,7 +3,7 @@ import struct
 import time
 
 from eggs_machina.hw_drivers.system.base import System
-from eggs_machina.hw_drivers.system.robstride.types import FeedbackResp, Robstride_Fault_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
+from eggs_machina.hw_drivers.system.robstride.types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
 from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
@@ -130,8 +130,13 @@ class Robstride(System):
 
         return ret
 
-    def get_fault_feedback_frame(self):
-        pass
+    def get_fault_feedback_frame(self) -> Robstride_Fault_Frame_Enum:
+        fault_feedback_frame_id = self.motor_can_id | (self.host_can_id << 8) | (Robstride_Msg_Enum.FAULT_FEEDBACK << 24)
+        fault_frame = self._read_frame(msg_id=fault_feedback_frame_id)
+        fault_bits = struct.unpack("<H", fault_frame[0:4])
+        for fault in Robstride_Fault_Frame_Enum:
+            if fault_bits & (1 << fault.value):
+                return fault
 
     def get_broadcast_frame(self):
         broadcast_can_id = 0xFE | (self.motor_can_id << 8)
