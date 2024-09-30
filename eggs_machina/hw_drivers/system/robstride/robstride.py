@@ -126,7 +126,7 @@ class Robstride(System):
         ret.angle_deg = self._radians_to_deg(self.scale_to_float(struct.unpack("<H", message[0:2]), 16, 4 * math.pi, -4 * math.pi)[0])
         ret.velocity_rads = self.scale_to_float(struct.unpack("<H", message[2:4])[0], 16, -44, 44)
         ret.torque_nm = self.scale_to_float(struct.unpack("<H", message[4:6])[0], 16, -17, 17)
-        ret.temp_c = self.scale_to_float(struct.unpack("<H", message[6:])[0] / 10, 16, 0, 2 ** 16 / 2))
+        ret.temp_c = self.scale_to_float(struct.unpack("<H", message[6:])[0] / 10, 16, 0, 2 ** 16 / 2)
 
         return ret
 
