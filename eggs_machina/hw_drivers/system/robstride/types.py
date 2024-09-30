@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List
 
-
 class Robstride_Motor_Mode_Enum(Enum):
     RESET_MODE = 0
     CALIBRATION_MODE = 1
@@ -43,8 +42,8 @@ class Robstride_Param_Type:
     name: str
     address: int
     byte_len: int
-    min: float
-    max: float
+    min: float | int
+    max: float | int
     can_write: bool
 
 class Robstride_Param_Enum(Enum):
@@ -55,13 +54,15 @@ class Robstride_Param_Enum(Enum):
     CURRENT_KP = 4
     CURRENT_KI = 5
     CURRENT_FILTER_GAIN = 6
+
     POSITION_MODE_ANGLE_CMD = 7
-    POSITION_MODE_LIMIT = 8
-    MECH_POS_END_COIL = 9
-    IQ_FILTER_VALUE = 10
-    MECH_VEL_END_COIL = 11
-    VBUS_VOLTAGE = 12
-    NUM_ROTATIONS = 13
-    POSITION_KP = 14
-    SPEED_KP = 15
-    SPEED_KI = 16
+    POSITION_MODE_SPEED_LIMIT = 8
+    POSITION_MODE_CURRENT_LIMIT = 9
+    MECH_POS_END_COIL = 10
+    IQ_FILTER_VALUE = 11
+    MECH_VEL_END_COIL = 12
+    VBUS_VOLTAGE = 13
+    NUM_ROTATIONS = 14
+    POSITION_KP = 15
+    SPEED_KP = 16
+    SPEED_KI = 17
