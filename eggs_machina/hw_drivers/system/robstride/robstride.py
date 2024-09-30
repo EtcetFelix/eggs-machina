@@ -8,7 +8,7 @@ from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
 
-from hw_drivers.system.robstride.constants import ROBSTRIDE_PARMS
+from eggs_machina.hw_drivers.system.robstride.constants import ROBSTRIDE_PARMS
 
 EMPTY_CAN_FRAME = bytes([0, 0, 0, 0, 0, 0, 0, 0])
 
