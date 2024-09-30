@@ -21,13 +21,7 @@ class USB2CANX2(Transport):
 
     def recv(self, can_id: int, is_extended_id: bool, timeout_s: int, *args, **kwargs) -> any:
         msg = self.bus.recv(timeout=timeout_s) 
-        # for msg in bus:
-        #     if time.time() >= end_time:
-        #         break
-        # print(f"DEBUG, can msg: {msg}")
         if msg:
-            print("FOUND SOMETHING")
-            print(f"FOUND: {msg}")
             if int(msg.arbitration_id) == can_id:
                 return CAN_Message(
                     can_id=int(msg.arbitration_id),
