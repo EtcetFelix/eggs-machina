@@ -66,7 +66,7 @@ class Robstride(System):
     def read_single_param(self, param: Robstride_Param_Enum) -> float | int:
         param_data = ROBSTRIDE_PARMS[param]
         data = EMPTY_CAN_FRAME
-        data[0:2] = struct.pack("<H",param_data.address)
+        data[0:2] = struct.pack("<H", param_data.address)
         self._send_frame(
             msg_type=Robstride_Msg_Enum.PARAM_READ,
             data=data
@@ -76,8 +76,17 @@ class Robstride(System):
         return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[8 - param_data.byte_len:])[0]
 
 
-    def write_single_param(self, param: Robstride_Param_Enum):
-        pass
+    def write_single_param(self, param: Robstride_Param_Enum, value: float | int) -> bool:
+        param_data = ROBSTRIDE_PARMS[param]
+        if value < param_data.min or value > param_data.max:
+            return False
+        data = EMPTY_CAN_FRAME
+        data[0:2] = struct.pack("<H", param_data.address)
+        data[8 - param_data.byte_len:] = struct.pack(f"<{param_data.data_type._type_}", value)
+        self._send_frame(
+            msg_type=Robstride_Msg_Enum.PARAM_WRITE,
+            data=data
+        )
 
     def move_to_position(self,
             torque_Nm: float,
