@@ -1,7 +1,7 @@
 from ctypes import c_float, c_short, c_ubyte
 import numpy as np
 
-from hw_drivers.system.robstride.types import Robstride_Param_Enum, Robstride_Param_Type
+from eggs_machina.hw_drivers.system.robstride.robstride_types import Robstride_Param_Enum, Robstride_Param_Type
 
 MAX_FLOAT_32 = np.finfo(np.float32).max
 MIN_FLOAT_32 = np.finfo(np.float32).min

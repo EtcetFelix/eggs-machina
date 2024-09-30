@@ -3,12 +3,13 @@ import struct
 import time
 
 from eggs_machina.hw_drivers.system.base import System
-from eggs_machina.hw_drivers.system.robstride.types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
+from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
 from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
 
-from hw_drivers.system.robstride.constants import ROBSTRIDE_PARMS
+from eggs_machina.hw_drivers.system.robstride.constants import ROBSTRIDE_PARMS
+from eggs_machina.hw_drivers.transport.can.usb2can_x2 import USB2CANX2
 
 EMPTY_CAN_FRAME = bytes([0, 0, 0, 0, 0, 0, 0, 0])
 
@@ -161,19 +162,35 @@ class Robstride(System):
                 
 
 if __name__ == "__main__":
-    pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
+    # pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
     
-    robstride = Robstride(host_can_id=0xFD, motor_can_id=0x7F, can_transport=pcan_transport)
-    device_id = robstride.get_device_id()
-    if device_id != None:
-        print(device_id)
+    # robstride = Robstride(host_can_id=0xFD, motor_can_id=0x7F, can_transport=pcan_transport)
+    # device_id = robstride.get_device_id()
+    # if device_id != None:
+    #     print(device_id)
 
-    robstride.enable_motor()
-    robstride.move_to_position(
-        moment_Nm=0.5, 
-        target_angle_deg=300,
-        angular_vel_rads=2.5,
-    )
+    # robstride.enable_motor()
+    # robstride.move_to_position(
+    #     moment_Nm=0.5, 
+    #     target_angle_deg=300,
+    #     angular_vel_rads=2.5,
+    # )
 
-    time.sleep(10)
-    robstride.stop_motor()
+    # time.sleep(10)
+    # robstride.stop_motor()
+
+
+
+    # pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
+    can_channel = "can1"
+    usb2can_transport = USB2CANX2(channel=can_channel, baud_rate=1000000)
+    
+    for i in range(1):
+        print(i)
+        robstride = Robstride(host_can_id=0xFD, motor_can_id=127, can_transport=usb2can_transport)
+        device_id = robstride.get_device_id()
+        if device_id != None:
+            print(device_id)
+            break
+    usb2can_transport.close_channel(can_channel)
+

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 from eggs_machina.hw_drivers.transport.base import Transport
-from eggs_machina.hw_drivers.transport.can import CAN_Message
 
 class System(ABC):
     @abstractmethod
