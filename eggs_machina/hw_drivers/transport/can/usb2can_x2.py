@@ -1,16 +1,11 @@
 """The driver for using the USB2CAN-X2 device by innomaker."""
 
-from dataclasses import dataclass
 from eggs_machina.hw_drivers.transport.base import Transport
 import can
 import os
 import time
 
-@dataclass
-class CAN_Message:
-    can_id: int
-    data_len: int
-    data: bytes
+from eggs_machina.hw_drivers.transport.can.types import CAN_Message
 
 class USB2CANX2(Transport):
     def __init__(self, channel: str, baud_rate: int):
@@ -23,7 +18,7 @@ class USB2CANX2(Transport):
         self.interface = 'socketcan'
         
 
-    def recv(self, can_id: int, is_extended_id: bool, timeout_s: int, *args, **kwargs) -> any:
+    def recv(self, can_id: int, is_extended_id: bool, timeout_s: int = 0.5) -> CAN_Message:
         end_time = time.time() + timeout_s
         while time.time() < end_time:
             with can.interface.Bus(channel=self.channel, interface=self.interface) as bus:
@@ -37,7 +32,19 @@ class USB2CANX2(Transport):
                             data=bytes(msg.data)
                         )
         return None
-
+    
+    def recv_in_range(self, can_id_min: int, can_id_max: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> tuple[int, CAN_Message]:
+        end_time = time.time() + timeout_s
+        while time.time() < end_time:
+            with self.bus as bus:
+                for msg in bus:
+                    if int(msg.arbitration_id) > can_id_min and int(msg.arbitration_id) < can_id_max:
+                        return tuple(int(msg.arbitration_id), CAN_Message(
+                            can_id=int(msg.arbitration_id),
+                            data_len=int(len(msg.data)),
+                            data=bytes(msg.data)
+                        ))
+        return tuple()
 
     def send(self, can_id: int, data: bytes, is_extended_id: bool, *args, **kwargs) -> bool:
         with can.interface.Bus(channel=self.channel, interface=self.interface) as bus:
