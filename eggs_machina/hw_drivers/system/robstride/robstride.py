@@ -3,10 +3,12 @@ import struct
 import time
 
 from eggs_machina.hw_drivers.system.base import System
-from eggs_machina.hw_drivers.system.robstride.types import FeedbackResp, Robstride_Fault_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum
+from eggs_machina.hw_drivers.system.robstride.types import FeedbackResp, Robstride_Fault_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
 from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
+
+from hw_drivers.system.robstride.constants import ROBSTRIDE_PARMS
 
 EMPTY_CAN_FRAME = bytes([0, 0, 0, 0, 0, 0, 0, 0])
 
@@ -61,10 +63,20 @@ class Robstride(System):
         )
         # TODO - reinit transport with new baud rate
     
-    def read_single_param(self):
-        pass
+    def read_single_param(self, param: Robstride_Param_Enum) -> float | int:
+        param_data = ROBSTRIDE_PARMS[param]
+        data = EMPTY_CAN_FRAME
+        data[0:2] = struct.pack("<H",param_data.address)
+        self._send_frame(
+            msg_type=Robstride_Msg_Enum.PARAM_READ,
+            data=data
+        )
+        response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ << 24)
+        param_response_frame = self._read_frame(response_id)
+        return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[8 - param_data.byte_len:])[0]
 
-    def write_single_param(self, param_index: int, ):
+
+    def write_single_param(self, param: Robstride_Param_Enum):
         pass
 
     def move_to_position(self,
@@ -102,10 +114,10 @@ class Robstride(System):
 
         ret.mode = Robstride_Motor_Mode_Enum((can_id >> 22) & 0x3)
 
-        ret.angle_deg = self._radians_to_deg(self.scale_to_float(struct.unpack("<H", message[0:2]), 16, 4 * math.pi, -4 * math.pi))
-        ret.velocity_rads = self.scale_to_float(struct.unpack("<H", message[2:4]), 16, -44, 44)
-        ret.torque_nm = self.scale_to_float(struct.unpack("<H", message[4:6]), 16, -17, 17)
-        ret.temp_c = self.scale_to_float(struct.unpack("<H", message[6:] / 10, 16, 0, 2 ** 16 / 2))
+        ret.angle_deg = self._radians_to_deg(self.scale_to_float(struct.unpack("<H", message[0:2]), 16, 4 * math.pi, -4 * math.pi)[0])
+        ret.velocity_rads = self.scale_to_float(struct.unpack("<H", message[2:4])[0], 16, -44, 44)
+        ret.torque_nm = self.scale_to_float(struct.unpack("<H", message[4:6])[0], 16, -17, 17)
+        ret.temp_c = self.scale_to_float(struct.unpack("<H", message[6:])[0] / 10, 16, 0, 2 ** 16 / 2))
 
         return ret
 

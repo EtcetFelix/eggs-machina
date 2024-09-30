@@ -1,6 +1,7 @@
+import ctypes
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Type
 
 class Robstride_Motor_Mode_Enum(Enum):
     RESET_MODE = 0
@@ -41,6 +42,7 @@ class FeedbackResp:
 class Robstride_Param_Type:
     name: str
     address: int
+    data_type: Type[ctypes._SimpleCData]
     byte_len: int
     min: float | int
     max: float | int
@@ -54,7 +56,6 @@ class Robstride_Param_Enum(Enum):
     CURRENT_KP = 4
     CURRENT_KI = 5
     CURRENT_FILTER_GAIN = 6
-
     POSITION_MODE_ANGLE_CMD = 7
     POSITION_MODE_SPEED_LIMIT = 8
     POSITION_MODE_CURRENT_LIMIT = 9
