@@ -43,12 +43,12 @@ class Robstride_Fault_Frame_Enum(Enum):
 
 @dataclass
 class FeedbackResp:
-    errors: List[Robstride_Fault_Enum]
-    mode: Robstride_Motor_Mode_Enum
-    angle_deg: float
-    velocity_rads: float
-    torque_nm: float
-    temp_c: float
+        errors: List[Robstride_Fault_Enum]
+        mode: Robstride_Motor_Mode_Enum
+        angle_deg: float
+        velocity_rads: float
+        torque_nm: float
+        temp_c: float
 
 @dataclass
 class Robstride_Param_Type:
