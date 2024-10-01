@@ -183,5 +183,7 @@ if __name__ == "__main__":
 
     control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
     print(control_mode)
+    bus_voltage = robstride.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
+    print(bus_voltage)
     usb2can_transport.close_channel(can_channel)
 
