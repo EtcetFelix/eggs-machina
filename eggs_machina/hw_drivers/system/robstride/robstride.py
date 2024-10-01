@@ -163,25 +163,6 @@ class Robstride(System):
 
 if __name__ == "__main__":
     # pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
-    
-    # robstride = Robstride(host_can_id=0xFD, motor_can_id=0x7F, can_transport=pcan_transport)
-    # device_id = robstride.get_device_id()
-    # if device_id != None:
-    #     print(device_id)
-
-    # robstride.enable_motor()
-    # robstride.move_to_position(
-    #     moment_Nm=0.5, 
-    #     target_angle_deg=300,
-    #     angular_vel_rads=2.5,
-    # )
-
-    # time.sleep(10)
-    # robstride.stop_motor()
-
-
-
-    # pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
     can_channel = "can1"
     usb2can_transport = USB2CANX2(channel=can_channel, baud_rate=1000000)
     
@@ -192,5 +173,15 @@ if __name__ == "__main__":
         if device_id != None:
             print(device_id)
             break
+
+    robstride.enable_motor()
+    robstride.move_to_position(
+        torque_Nm=0.1, 
+        target_angle_deg=300,
+        angular_vel_rads=0.5,
+    )
+
+    time.sleep(2)
+    robstride.stop_motor()
     usb2can_transport.close_channel(can_channel)
 
