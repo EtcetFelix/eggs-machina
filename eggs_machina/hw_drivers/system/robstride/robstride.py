@@ -81,9 +81,9 @@ class Robstride(System):
         param_data = ROBSTRIDE_PARMS[param]
         if value < param_data.min or value > param_data.max:
             return False
-        data = EMPTY_CAN_FRAME
+        data = bytearray(EMPTY_CAN_FRAME)
         data[0:2] = struct.pack("<H", param_data.address)
-        data[8 - param_data.byte_len:] = struct.pack(f"<{param_data.data_type._type_}", value)
+        data[4:4+param_data.byte_len] = struct.pack(f"<{param_data.data_type._type_}", value)
         self._send_frame(
             msg_type=Robstride_Msg_Enum.PARAM_WRITE,
             data=data
