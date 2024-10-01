@@ -181,7 +181,7 @@ if __name__ == "__main__":
         angular_vel_rads=0.5,
     )
 
-    time.sleep(2)
-    robstride.stop_motor()
+    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
+    print(control_mode)
     usb2can_transport.close_channel(can_channel)
 
