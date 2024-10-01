@@ -66,13 +66,13 @@ class Robstride(System):
     
     def read_single_param(self, param: Robstride_Param_Enum) -> float | int:
         param_data = ROBSTRIDE_PARMS[param]
-        data = EMPTY_CAN_FRAME
+        data = bytearray(EMPTY_CAN_FRAME)
         data[0:2] = struct.pack("<H", param_data.address)
         self._send_frame(
             msg_type=Robstride_Msg_Enum.PARAM_READ,
             data=data
         )
-        response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ << 24)
+        response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ.value << 24)
         param_response_frame = self._read_frame(response_id)
         return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[8 - param_data.byte_len:])[0]
 
