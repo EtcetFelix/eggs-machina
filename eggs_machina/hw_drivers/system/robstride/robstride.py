@@ -174,16 +174,39 @@ if __name__ == "__main__":
             print(device_id)
             break
 
-    robstride.enable_motor()
-    robstride.move_to_position(
-        torque_Nm=0.1, 
-        target_angle_deg=300,
-        angular_vel_rads=0.5,
-    )
+    # robstride.enable_motor()
+    # robstride.move_to_position(
+    #     torque_Nm=0.1, 
+    #     target_angle_deg=300,
+    #     angular_vel_rads=0.5,
+    # )
+
+    # time.sleep(2)
+    # robstride.stop_motor()
+
 
     control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
     print(control_mode)
+    max_speed = robstride.read_single_param(Robstride_Param_Enum.POSITION_MODE_SPEED_LIMIT)
+    print(max_speed)
+    pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+    print(pos)
     bus_voltage = robstride.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
     print(bus_voltage)
+
+    def test_speed_control(robstride):
+        robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 1)
+        robstride.enable_motor()
+        robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, 0.9)
+        time.sleep(1)
+        robstride.stop_motor()
+        robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)
+        pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+        print(pos)
+
+    test_speed_control(robstride)
+    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
+    print(control_mode)
+
     usb2can_transport.close_channel(can_channel)
 
