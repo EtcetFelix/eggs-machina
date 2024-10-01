@@ -204,8 +204,9 @@ if __name__ == "__main__":
         pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
         print(pos)
 
-    test_speed_control(robstride)
-    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
+    # test_speed_control(robstride)
+    robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)      
+    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)   # TODO: Fix reading empty frame for parameter right after changing it (such as in these 2 lines)
     print(control_mode)
 
     usb2can_transport.close_channel(can_channel)
