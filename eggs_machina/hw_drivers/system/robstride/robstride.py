@@ -74,7 +74,7 @@ class Robstride(System):
         )
         response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ.value << 24)
         param_response_frame = self._read_frame(response_id)
-        return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[8 - param_data.byte_len:])[0]
+        return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[4:4+param_data.byte_len])[0]
 
 
     def write_single_param(self, param: Robstride_Param_Enum, value: float | int) -> bool:
