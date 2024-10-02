@@ -19,6 +19,7 @@ class System(ABC):
         result = round(((val - raw_min) * (2 ** bits)) / (raw_max - raw_min))
         return min(result, 2**bits - 1)
     
+    @staticmethod
     def scale_to_float(
         val: int,
         bits: int,
