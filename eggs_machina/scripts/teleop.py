@@ -69,7 +69,6 @@ def shutdown_robots_gracefully(robots: List[Any]):
     """Gracefully turn off all robots."""
     for robot in robots:
         robot.stop_motor()
-    pass
 
 
 if __name__ == "__main__":
