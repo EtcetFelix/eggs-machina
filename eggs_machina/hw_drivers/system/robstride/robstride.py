@@ -65,6 +65,18 @@ class Robstride(System):
             data=data
         )
         # TODO - reinit transport with new baud rate
+
+    def _retry_read(self, response_id):
+        """Retry reading a frame when it's empty."""
+        param_response_frame = None
+        attempts_to_try = 7
+        attempts_tried = 1
+        while param_response_frame==None and attempts_tried<attempts_to_try:
+            # print(f"attempt {attempts_tried}: {param_response_frame}")
+            param_response_frame = self._read_frame(response_id)
+            attempts_tried+=1
+        return param_response_frame
+
     
     def read_single_param(self, param: Robstride_Param_Enum) -> float | int:
         param_data = ROBSTRIDE_PARMS[param]
@@ -76,6 +88,8 @@ class Robstride(System):
         )
         response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ.value << 24)
         param_response_frame = self._read_frame(response_id)
+        if param_response_frame==None:
+            param_response_frame = self._retry_read(response_id)
         return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[4:4+param_data.byte_len])[0]
 
 
