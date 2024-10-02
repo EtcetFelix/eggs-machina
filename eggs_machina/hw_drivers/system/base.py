@@ -14,9 +14,10 @@ class System(ABC):
         raw_min: int | float,
         bits: int
     ) -> int:
-        if val < raw_max or val < raw_min:
+        if val > raw_max or val < raw_min:
             return 0
-        return round(((val - raw_min) * (2 ** bits)) / (raw_max - raw_min))
+        result = round(((val - raw_min) * (2 ** bits)) / (raw_max - raw_min))
+        return min(result, 2**bits - 1)
     
     def scale_to_float(
         val: int,

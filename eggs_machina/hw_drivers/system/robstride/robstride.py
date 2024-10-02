@@ -66,24 +66,24 @@ class Robstride(System):
     
     def read_single_param(self, param: Robstride_Param_Enum) -> float | int:
         param_data = ROBSTRIDE_PARMS[param]
-        data = EMPTY_CAN_FRAME
+        data = bytearray(EMPTY_CAN_FRAME)
         data[0:2] = struct.pack("<H", param_data.address)
         self._send_frame(
             msg_type=Robstride_Msg_Enum.PARAM_READ,
             data=data
         )
-        response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ << 24)
+        response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ.value << 24)
         param_response_frame = self._read_frame(response_id)
-        return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[8 - param_data.byte_len:])[0]
+        return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[4:4+param_data.byte_len])[0]
 
 
     def write_single_param(self, param: Robstride_Param_Enum, value: float | int) -> bool:
         param_data = ROBSTRIDE_PARMS[param]
         if value < param_data.min or value > param_data.max:
             return False
-        data = EMPTY_CAN_FRAME
+        data = bytearray(EMPTY_CAN_FRAME)
         data[0:2] = struct.pack("<H", param_data.address)
-        data[8 - param_data.byte_len:] = struct.pack(f"<{param_data.data_type._type_}", value)
+        data[4:4+param_data.byte_len] = struct.pack(f"<{param_data.data_type._type_}", value)
         self._send_frame(
             msg_type=Robstride_Msg_Enum.PARAM_WRITE,
             data=data
@@ -163,25 +163,6 @@ class Robstride(System):
 
 if __name__ == "__main__":
     # pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
-    
-    # robstride = Robstride(host_can_id=0xFD, motor_can_id=0x7F, can_transport=pcan_transport)
-    # device_id = robstride.get_device_id()
-    # if device_id != None:
-    #     print(device_id)
-
-    # robstride.enable_motor()
-    # robstride.move_to_position(
-    #     moment_Nm=0.5, 
-    #     target_angle_deg=300,
-    #     angular_vel_rads=2.5,
-    # )
-
-    # time.sleep(10)
-    # robstride.stop_motor()
-
-
-
-    # pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
     can_channel = "can1"
     usb2can_transport = USB2CANX2(channel=can_channel, baud_rate=1000000)
     
@@ -192,5 +173,41 @@ if __name__ == "__main__":
         if device_id != None:
             print(device_id)
             break
+
+    # robstride.enable_motor()
+    # robstride.move_to_position(
+    #     torque_Nm=0.1, 
+    #     target_angle_deg=300,
+    #     angular_vel_rads=0.5,
+    # )
+
+    # time.sleep(2)
+    # robstride.stop_motor()
+
+
+    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
+    print(control_mode)
+    max_speed = robstride.read_single_param(Robstride_Param_Enum.POSITION_MODE_SPEED_LIMIT)
+    print(max_speed)
+    pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+    print(pos)
+    bus_voltage = robstride.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
+    print(bus_voltage)
+
+    def test_speed_control(robstride):
+        robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 1)
+        robstride.enable_motor()
+        robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, 0.9)
+        time.sleep(1)
+        robstride.stop_motor()
+        robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)
+        pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+        print(pos)
+
+    # test_speed_control(robstride)
+    robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)      
+    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)   # TODO: Fix reading empty frame for parameter right after changing it (such as in these 2 lines)
+    print(control_mode)
+
     usb2can_transport.close_channel(can_channel)
 
