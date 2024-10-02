@@ -5,6 +5,7 @@ from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
+from eggs_machina.hw_drivers.transport.can.usb2can_x2 import USB2CANX2
 from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
 import time
 
@@ -28,7 +29,11 @@ def instantiate_robots(transport: Transport) -> List[Any]:
     # transport2 =  can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
     host_can_id = 0xFD
     leader = Robstride(transport, host_can_id, motor_can_id=127)
-    follower = Robstride(transport2, host_can_id, motor_can_id=127)
+    follower = Robstride(transport, host_can_id, motor_can_id=126)
+    leader_bus_voltage = leader.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
+    print(f"leader_bus_voltage: {leader_bus_voltage}")
+    follower_bus_voltage = follower.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
+    print(f"follower_bus_voltage: {follower_bus_voltage}")
     follower.write_single_param(Robstride_Param_Enum.RUN_MODE, 1)
     leader.stop_motor()
     follower.enable_motor()
