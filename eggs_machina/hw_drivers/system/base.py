@@ -17,7 +17,7 @@ class System(ABC):
         if val > raw_max or val < raw_min:
             return 0
         result = round(((val - raw_min) * (2 ** bits)) / (raw_max - raw_min))
-        return max(0, min(result, 2**bits - 1))
+        return min(result, 2**bits - 1)
     
     def scale_to_float(
         val: int,
