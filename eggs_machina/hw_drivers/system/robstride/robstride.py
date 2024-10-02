@@ -47,7 +47,7 @@ class Robstride(System):
         )
 
     def set_motor_can_id(self, new_can_id: int):
-        can_frame_id = self.motor_can_id | (new_can_id << 8) | (new_can_id << 16) | ( Robstride_Msg_Enum.SET_CAN_ID << 24)
+        can_frame_id = self.motor_can_id | (new_can_id << 8) | (new_can_id << 16) | ( Robstride_Msg_Enum.SET_CAN_ID.value << 24)
         self.can_transport.send(can_id=can_frame_id, data=EMPTY_CAN_FRAME, is_extended_id=True)
 
     def set_motor_baud_rate(self, new_baud_rate: can_transport.CAN_Baud_Rate):
