@@ -12,6 +12,15 @@ def set_position(leader: Robstride, follower: Robstride):
     pos = leader.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
     follower.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, pos)
 
+def instantiate_transport() -> Transport:
+    channel = "can1"
+    transport = USB2CANX2(channel=channel, baud_rate=1000000)
+    return transport, channel
+
+def shutdown_transport(transport: Transport, can_channel):
+    """Gracefully shutdown the transport channel."""
+    transport.close_channel(can_channel)
+
 
 def instantiate_robots() -> List[Any]:
     """Define and instantiate all robots used during teleop."""
@@ -57,12 +66,13 @@ def shutdown_robots_gracefully(robots: List[Any]):
 
 
 if __name__ == "__main__":
-    robots = instantiate_robots()
+    transport, channel = instantiate_transport()
     try:
         main()
     except KeyboardInterrupt:
         print("Shutdown requested...exiting")
         shutdown_robots_gracefully(robots)
+        shutdown_transport(transport, channel)
         try:
             sys.exit(130)
         except SystemExit:
