@@ -10,7 +10,9 @@ from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackRes
 import time
 
 def set_position(leader: Robstride, follower: Robstride):
+    print()
     pos = leader.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+    print(f"Read pos:{pos}, writing to follower")
     follower.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, pos)
 
 def instantiate_transport() -> Transport:
