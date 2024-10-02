@@ -19,7 +19,7 @@ class USB2CANX2(Transport):
         self.bus = can.interface.Bus(channel=self.channel, interface=self.interface)
         
 
-    def recv(self, can_id: int, is_extended_id: bool, timeout_s: int, *args, **kwargs) -> any:
+    def recv(self, can_id: int, is_extended_id: bool, timeout_s: int = 0.5) -> any:
         msg = self.bus.recv(timeout=timeout_s) 
         if msg:
             if int(msg.arbitration_id) == can_id:
@@ -33,6 +33,16 @@ class USB2CANX2(Transport):
     def recv_in_range(self, can_id_min: int, can_id_max: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> tuple[int, CAN_Message]:
         msg = self.bus.recv(timeout=timeout_s) 
         if int(msg.arbitration_id) > can_id_min and int(msg.arbitration_id) < can_id_max:
+            return tuple(int(msg.arbitration_id), CAN_Message(
+                can_id=int(msg.arbitration_id),
+                data_len=int(len(msg.data)),
+                data=bytes(msg.data)
+            ))
+        return tuple()
+    
+    def recv_bitmasked_can_id(self, can_id: int, bitmask: int, is_extended_id: bool, timeout_s: int = 0.5) -> tuple[int, CAN_Message]:
+        msg = self.bus.recv(timeout=timeout_s) 
+        if (int(msg.arbitration_id) & bitmask) == (can_id & bitmask):
             return tuple(int(msg.arbitration_id), CAN_Message(
                 can_id=int(msg.arbitration_id),
                 data_len=int(len(msg.data)),

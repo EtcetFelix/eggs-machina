@@ -55,6 +55,23 @@ class PCAN(Transport):
                     data=bytes(msg.DATA)
                 ))
         return tuple()
+    
+    def recv_bitmasked_can_id(self, can_id: int, bitmask: int, is_extended_id: bool, timeout_s: int) -> tuple[int, CAN_Message]:
+        msg_type = PCANBasic.PCAN_MESSAGE_STANDARD
+        if is_extended_id:
+            msg_type = PCANBasic.PCAN_MESSAGE_EXTENDED
+        end_time = time.time() + timeout_s
+        while time.time() < end_time:
+            status, msg, _ = self.transport.Read(self.channel)
+            if status != PCANBasic.PCAN_ERROR_OK:
+                continue
+            if (msg.ID & bitmask) == (can_id & bitmask) and msg.MSGTYPE == msg_type.value:
+                return tuple(int(msg.ID), CAN_Message(
+                    can_id=int(msg.ID),
+                    data_len=int(msg.LEN),
+                    data=bytes(msg.DATA)
+                ))
+        return tuple()
         
     def send(self, can_id: int, data: bytes, is_extended_id: bool = False) -> bool:
         msg = PCANBasic.TPCANMsg()

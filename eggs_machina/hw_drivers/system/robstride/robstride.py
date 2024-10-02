@@ -107,11 +107,14 @@ class Robstride(System):
         self.can_transport.send(can_id=position_cmd_can_id, data=data, is_extended_id=True)
 
     def get_motor_feedback_frame(self) -> FeedbackResp:
-        # feedback frame puts error reporting data in the CAN_ID - so we need to listen for a range of IDs instead of a specific one
         ret = FeedbackResp()
-        can_id, message = self.transport.recv_in_range(
-            can_id_min=(Robstride_Msg_Enum.MOTOR_FEEDBACK << 28), 
-            can_id_max=((Robstride_Msg_Enum.MOTOR_FEEDBACK + 1 ) << 28) - 1, 
+        # feedback frame puts dynamic error reporting and control mode data in bits 16-23 so we need to listen for a bitmasked ID
+        expected_partial_can_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.MOTOR_FEEDBACK.value << 24)
+        bitmask = 0x1F00FFFF
+
+        can_id, message = self.transport.recv_bitmasked_can_id(
+            can_id=expected_partial_can_id, 
+            bitmask=bitmask,
             is_extended_id=True
         )
         if message == None:

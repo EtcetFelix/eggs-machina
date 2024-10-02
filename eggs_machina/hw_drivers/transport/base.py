@@ -11,5 +11,9 @@ class Transport(ABC):
         pass
 
     @abstractmethod
+    def recv_bitmasked_can_id(self, can_id: int, bitmask: int, is_extended_id: bool, timeout_s: int, *args, **kwargs) -> any:
+        pass
+
+    @abstractmethod
     def send(self, can_id: int, data: bytes, is_extended_id: bool, *args, **kwargs) -> bool:
         pass
