@@ -39,7 +39,7 @@ class PCAN(Transport):
                 )
         return None
     
-    def recv_in_range(self, can_id_min: int, can_id_max: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> tuple[int, CAN_Message]:
+    def recv_in_range(self, can_id_min: int, can_id_max: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> CAN_Message:
         msg_type = PCANBasic.PCAN_MESSAGE_STANDARD
         if is_extended_id:
             msg_type = PCANBasic.PCAN_MESSAGE_EXTENDED
@@ -49,14 +49,14 @@ class PCAN(Transport):
             if status != PCANBasic.PCAN_ERROR_OK:
                 continue
             if int(msg.ID) >= can_id_min and int(msg.ID) <= can_id_max and msg.MSGTYPE == msg_type.value:
-                return tuple(int(msg.ID), CAN_Message(
+                return CAN_Message(
                     can_id=int(msg.ID),
                     data_len=int(msg.LEN),
                     data=bytes(msg.DATA)
-                ))
-        return tuple()
+                )
+        return None
     
-    def recv_bitmasked_can_id(self, can_id: int, bitmask: int, is_extended_id: bool, timeout_s: int) -> tuple[int, CAN_Message]:
+    def recv_bitmasked_can_id(self, can_id: int, bitmask: int, is_extended_id: bool, timeout_s: int = 0.5) -> CAN_Message:
         msg_type = PCANBasic.PCAN_MESSAGE_STANDARD
         if is_extended_id:
             msg_type = PCANBasic.PCAN_MESSAGE_EXTENDED
@@ -66,12 +66,12 @@ class PCAN(Transport):
             if status != PCANBasic.PCAN_ERROR_OK:
                 continue
             if (msg.ID & bitmask) == (can_id & bitmask) and msg.MSGTYPE == msg_type.value:
-                return tuple(int(msg.ID), CAN_Message(
+                return CAN_Message(
                     can_id=int(msg.ID),
                     data_len=int(msg.LEN),
                     data=bytes(msg.DATA)
-                ))
-        return tuple()
+                )
+        return None
         
     def send(self, can_id: int, data: bytes, is_extended_id: bool = False) -> bool:
         msg = PCANBasic.TPCANMsg()
@@ -89,4 +89,7 @@ class PCAN(Transport):
         except:
             print(f"Failed to write CAN-ID: {can_id}")
             return False
-        return True       
+        return True    
+
+    def __del__(self):
+        self.transport.Uninitialize(self.channel)

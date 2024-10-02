@@ -1,6 +1,7 @@
 import math
 import struct
 import time
+from typing import List
 
 from eggs_machina.hw_drivers.system.base import System
 from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
@@ -9,6 +10,7 @@ from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
 
 from eggs_machina.hw_drivers.system.robstride.constants import ROBSTRIDE_PARMS
+from eggs_machina.hw_drivers.transport.can.types import CAN_Message
 from eggs_machina.hw_drivers.transport.can.usb2can_x2 import USB2CANX2
 
 EMPTY_CAN_FRAME = bytes([0, 0, 0, 0, 0, 0, 0, 0])
@@ -107,32 +109,38 @@ class Robstride(System):
         self.can_transport.send(can_id=position_cmd_can_id, data=data, is_extended_id=True)
 
     def get_motor_feedback_frame(self) -> FeedbackResp:
-        ret = FeedbackResp()
         # feedback frame puts dynamic error reporting and control mode data in bits 16-23 so we need to listen for a bitmasked ID
         expected_partial_can_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.MOTOR_FEEDBACK.value << 24)
         bitmask = 0x1F00FFFF
 
-        can_id, message = self.transport.recv_bitmasked_can_id(
+        message: CAN_Message = self.can_transport.recv_bitmasked_can_id(
             can_id=expected_partial_can_id, 
             bitmask=bitmask,
             is_extended_id=True
         )
         if message == None:
-            return ret
+            return None
 
-        error_bits = (can_id >> 16) & 0x3F
+        errors: List[Robstride_Fault_Enum] = []
+        error_bits = (message.can_id >> 16) & 0x3F
         for fault in Robstride_Fault_Enum:
             if error_bits & (1 << fault.value):
-                ret.errors.append(fault)
+                errors.append(fault)
 
-        ret.mode = Robstride_Motor_Mode_Enum((can_id >> 22) & 0x3)
+        mode = Robstride_Motor_Mode_Enum((message.can_id >> 22) & 0x3)
+        angle_deg = self._radians_to_deg(self.scale_to_float(struct.unpack("<H", message.data[0:2])[0], 16, 4 * math.pi, -4 * math.pi))
+        velocity_rads = self.scale_to_float(struct.unpack("<H", message.data[2:4])[0], 16, -44, 44)
+        torque_nm = self.scale_to_float(struct.unpack("<H", message.data[4:6])[0], 16, -17, 17)
+        temp_c = self.scale_to_float(struct.unpack("<H", message.data[6:])[0] / 10, 16, 0, 2 ** 16 / 2)
 
-        ret.angle_deg = self._radians_to_deg(self.scale_to_float(struct.unpack("<H", message[0:2]), 16, 4 * math.pi, -4 * math.pi)[0])
-        ret.velocity_rads = self.scale_to_float(struct.unpack("<H", message[2:4])[0], 16, -44, 44)
-        ret.torque_nm = self.scale_to_float(struct.unpack("<H", message[4:6])[0], 16, -17, 17)
-        ret.temp_c = self.scale_to_float(struct.unpack("<H", message[6:])[0] / 10, 16, 0, 2 ** 16 / 2)
-
-        return ret
+        return FeedbackResp(
+            errors=errors,
+            mode=mode,
+            angle_deg=angle_deg,
+            velocity_rads=velocity_rads,
+            torque_nm=torque_nm,
+            temp_c=temp_c
+        )
 
     def get_fault_feedback_frame(self) -> Robstride_Fault_Frame_Enum:
         fault_feedback_frame_id = self.motor_can_id | (self.host_can_id << 8) | (Robstride_Msg_Enum.FAULT_FEEDBACK << 24)
@@ -165,17 +173,10 @@ class Robstride(System):
                 
 
 if __name__ == "__main__":
-    # pcan_transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
-    can_channel = "can1"
-    usb2can_transport = USB2CANX2(channel=can_channel, baud_rate=1000000)
-    
-    for i in range(1):
-        print(i)
-        robstride = Robstride(host_can_id=0xFD, motor_can_id=127, can_transport=usb2can_transport)
-        device_id = robstride.get_device_id()
-        if device_id != None:
-            print(device_id)
-            break
+    transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
+    # can_channel = "can1"
+    # usb2can_transport = USB2CANX2(channel=can_channel, baud_rate=1000000)
+    robstride = Robstride(host_can_id=0xFD, motor_can_id=127, can_transport=transport)
 
     # robstride.enable_motor()
     # robstride.move_to_position(
@@ -187,7 +188,6 @@ if __name__ == "__main__":
     # time.sleep(2)
     # robstride.stop_motor()
 
-
     control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
     print(control_mode)
     max_speed = robstride.read_single_param(Robstride_Param_Enum.POSITION_MODE_SPEED_LIMIT)
@@ -197,20 +197,22 @@ if __name__ == "__main__":
     bus_voltage = robstride.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
     print(bus_voltage)
 
-    def test_speed_control(robstride):
+    def test_position_control(robstride: Robstride):
         robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 1)
         robstride.enable_motor()
-        robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, 0.9)
+        robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, 2)
+        feedback = robstride.get_motor_feedback_frame()
+        print(feedback)
         time.sleep(1)
         robstride.stop_motor()
         robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)
         pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
         print(pos)
 
-    # test_speed_control(robstride)
-    robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)      
-    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)   # TODO: Fix reading empty frame for parameter right after changing it (such as in these 2 lines)
+    test_position_control(robstride)
+    # robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)      
+    # control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)   # TODO: Fix reading empty frame for parameter right after changing it (such as in these 2 lines)
     print(control_mode)
 
-    usb2can_transport.close_channel(can_channel)
+    #usb2can_transport.close_channel(can_channel)
 

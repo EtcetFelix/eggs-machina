@@ -3,7 +3,6 @@
 from eggs_machina.hw_drivers.transport.base import Transport
 import can
 import os
-import time
 
 from eggs_machina.hw_drivers.transport.can.types import CAN_Message
 
@@ -30,25 +29,25 @@ class USB2CANX2(Transport):
                 )
         return None
     
-    def recv_in_range(self, can_id_min: int, can_id_max: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> tuple[int, CAN_Message]:
+    def recv_in_range(self, can_id_min: int, can_id_max: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> CAN_Message:
         msg = self.bus.recv(timeout=timeout_s) 
         if int(msg.arbitration_id) > can_id_min and int(msg.arbitration_id) < can_id_max:
-            return tuple(int(msg.arbitration_id), CAN_Message(
+            return CAN_Message(
                 can_id=int(msg.arbitration_id),
                 data_len=int(len(msg.data)),
                 data=bytes(msg.data)
-            ))
-        return tuple()
+            )
+        return None
     
-    def recv_bitmasked_can_id(self, can_id: int, bitmask: int, is_extended_id: bool, timeout_s: int = 0.5) -> tuple[int, CAN_Message]:
+    def recv_bitmasked_can_id(self, can_id: int, bitmask: int, is_extended_id: bool, timeout_s: int = 0.5) -> CAN_Message:
         msg = self.bus.recv(timeout=timeout_s) 
         if (int(msg.arbitration_id) & bitmask) == (can_id & bitmask):
-            return tuple(int(msg.arbitration_id), CAN_Message(
+            return CAN_Message(
                 can_id=int(msg.arbitration_id),
                 data_len=int(len(msg.data)),
                 data=bytes(msg.data)
-            ))
-        return tuple()
+            )
+        return None
 
     def send(self, can_id: int, data: bytes, is_extended_id: bool, *args, **kwargs) -> bool:
         msg = can.Message(arbitration_id=can_id, data=data, is_extended_id=is_extended_id)
