@@ -16,10 +16,10 @@ class RoboRob():
         self.servos = servos
 
 
-    def read_position(self) -> Dict[int, float]:
+    def read_position(self) -> Dict[Robstride, float]:
         positions = {}
         for can_id, servo in self.servos.items():
-            positions[can_id] = servo.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+            positions[servo] = servo.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
         return positions
 
 

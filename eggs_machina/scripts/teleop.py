@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 from typing import Any, List
 from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from eggs_machina.hw_drivers.transport.can import PCANBasic
@@ -21,6 +22,47 @@ FOLLOWER_SERVO_IDS = [50, 40]
 JOINT_MAPPING = {44:50, 42:40}
 
 HOST_ID = 0xFD
+
+class Teleoperator:
+    def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
+        self.leader = leader
+        self.follower = follower
+        self.joint_map = joint_map
+        self.run_operation = False
+        self.teleop_thread = None
+
+    def run(self, delay_ms: int):
+        self.follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
+        self.follower.enable_motors()
+        self.leader.stop_motors()
+        self.run_operation = True
+        
+        if self.thread is None or not self.thread.is_alive():
+            self.thread = threading.Thread(target=self._run, args=(delay_ms), daemon=True)
+            self.thread.start()
+
+    def _run(self, delay_ms: int):
+        while self.run_operation:
+            self._set_position()
+            time.sleep(delay_ms)
+
+    def _set_position(self):
+        leader_positions: Dict[Robstride, float] = self.leader.read_position()
+        for leader_robstride, position in leader_positions:
+            follower_robstride = self.joint_map.get(leader_robstride, None)
+            if follower_robstride == None:
+                self.stop()
+                raise ValueError
+            follower_robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, position)
+
+    def stop(self):
+        self.run_operation = False
+        if self.thread:
+            self.thread.join()
+
+    def __del__(self):
+        self.stop()
+
 
 def convert_leader_to_follower_joints(leader_position: Dict[int, float], servo_joint_mapping: Dict[int, int]) -> Dict[int, float]:
     """
@@ -99,7 +141,7 @@ def instantiate_robots(transports: Dict[str, Transport]) -> List[Any]:
     time.sleep(0.05)   
     set_position(leader, follower, JOINT_MAPPING)
     time.sleep(1)
-    follower.stop_motors()  
+    follower.stop_motors()
     return [leader, follower]
 
 
@@ -129,19 +171,45 @@ def shutdown_robots_gracefully(robots: List[Any]):
 
 
 if __name__ == "__main__":
-    transports = instantiate_transports()
-    robots = instantiate_robots(transports)
-    try:
-        main(robots)
-    except KeyboardInterrupt:
-        print("Shutdown requested...exiting")
-        shutdown_robots_gracefully(robots)
-        shutdown_transports(transports)
-        try:
-            sys.exit(130)
-        except SystemExit:
-            os._exit(130)
-    except Exception as e:
-        print("Exception occurred, shutting down transport...")
-        shutdown_transports(transports)
-        print(e)
+    # All motors on single CAN transport
+    transport = USB2CANX2(channel="can0", baud_rate=1000000)
+    host_id = 0xFD
+
+    # Follower motors
+    follower_x = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=40)
+    follower_y = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=50)
+    follower_robot = RoboRob(
+        servos={
+            follower_x.motor_can_id: follower_x,
+            follower_y.motor_can_id: follower_y
+        }
+    )
+
+    # Leader motors
+    leader_x = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=42)
+    leader_y = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=44)
+    leader_robot = RoboRob(
+        servos={
+            leader_x.motor_can_id: leader_x,
+            leader_y.motor_can_id: leader_y
+        }
+    )
+
+    teleoperator = Teleoperator(
+        leader=leader_robot,
+        follower=follower_robot,
+        joint_map={
+            leader_x: follower_x,
+            leader_y: follower_y
+        }
+    )
+
+    teleoperator.run(delay_ms=0.05)
+    input("Press Enter to end teleop...")
+    teleoperator.stop()
+
+
+
+
+
+
