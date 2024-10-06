@@ -189,10 +189,12 @@ class Robstride(System):
 
 if __name__ == "__main__":
     # transport = can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
-    can_channel = "can1"
-    transport = USB2CANX2(channel=can_channel, baud_rate=1000000)
-    robstride = Robstride(host_can_id=0xFD, motor_can_id=126, can_transport=transport)
-    robstride2 = Robstride(host_can_id=0xFD, motor_can_id=127, can_transport=transport)
+    can_channel = "can0"
+    with USB2CANX2(channel=can_channel, baud_rate=1000000) as transport:
+        robstride = Robstride(host_can_id=0xFD, motor_can_id=126, can_transport=transport)
+        bus_voltage = robstride.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
+        print(bus_voltage)
+    # robstride2 = Robstride(host_can_id=0xFD, motor_can_id=127, can_transport=transport)
 
     # robstride.enable_motor()
     # robstride.move_to_position(
@@ -204,16 +206,15 @@ if __name__ == "__main__":
     # time.sleep(2)
     # robstride.stop_motor()
 
-    control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
-    print(control_mode)
-    max_speed = robstride.read_single_param(Robstride_Param_Enum.POSITION_MODE_SPEED_LIMIT)
-    print(max_speed)
-    pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
-    print(pos)
-    bus_voltage = robstride.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
-    print(bus_voltage)
-    bus_voltage2 = robstride2.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
-    print(bus_voltage2)
+    # control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
+    # print(control_mode)
+    # max_speed = robstride.read_single_param(Robstride_Param_Enum.POSITION_MODE_SPEED_LIMIT)
+    # print(max_speed)
+    # pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+    # print(pos)
+        
+    # bus_voltage2 = robstride2.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
+    # print(bus_voltage2)
     # robstride.set_motor_can_id(126)
 
     def test_position_control(robstride: Robstride):
@@ -233,5 +234,5 @@ if __name__ == "__main__":
     # control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)   # TODO: Fix reading empty frame for parameter right after changing it (such as in these 2 lines)
     # print(control_mode)
 
-    transport.close(can_channel)
+    # transport.close()
 
