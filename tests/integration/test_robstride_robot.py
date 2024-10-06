@@ -56,11 +56,21 @@ def test_stop_motors():
         robot.stop_motors()
 
 
+def test_read_control_modes():
+    with USB2CANX2(channel=CAN_CHANNEL, baud_rate=1000000) as transport:
+        servos = {}
+        for can_id in CAN_IDS:
+            servos[can_id] = Robstride(host_can_id=HOST_ID, motor_can_id=can_id, can_transport=transport)
+        robot = RoboRob(servos)
+        print(robot.read_control_mode())
+
+
 
 
 if __name__ == "__main__":
     test_read_positions()
     test_set_control_mode()
+    test_read_control_modes()
     test_enable_motors()
     test_set_positions()
     time.sleep(1)
