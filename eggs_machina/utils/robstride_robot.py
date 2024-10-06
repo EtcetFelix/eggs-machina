@@ -46,4 +46,4 @@ class RoboRob():
 
     def set_control_mode(self, control_mode: Robstride_Control_Modes):
         for can_id, servo in self.servos.items():
-            servo.write_single_param(Robstride_Param_Enum.RUN_MODE, control_mode)
+            servo.write_single_param(Robstride_Param_Enum.RUN_MODE, control_mode.value)
