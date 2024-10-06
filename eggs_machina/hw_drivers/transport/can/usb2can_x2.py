@@ -76,8 +76,8 @@ class USB2CANX2(Transport):
             return False
         return True
 
-    def __del__(self):
-        self.__exit__()
+    # def __del__(self):
+    #     self.__exit__()
 
 if __name__ == "__main__":
     usb2can = USB2CANX2(channel="can1", baud_rate=10000)
