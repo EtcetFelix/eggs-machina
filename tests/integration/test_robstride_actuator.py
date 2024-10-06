@@ -46,8 +46,16 @@ def test_read_position():
         pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
         print(pos)
 
+def test_set_motor_id():
+    old_can_id = 127
+    new_can_id = 125
+    with USB2CANX2(channel=CAN_CHANNEL, baud_rate=1000000) as transport:
+        robstride = Robstride(host_can_id=0xFD, motor_can_id=old_can_id, can_transport=transport)
+        robstride.set_motor_can_id(new_can_id)
+
 if __name__ == "__main__":
     test_get_vbus()
     test_read_run_mode()
     test_position_max_speed_limit()
     test_read_position()
+    test_set_motor_id()
