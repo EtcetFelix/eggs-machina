@@ -8,6 +8,7 @@ from eggs_machina.hw_drivers.transport.can import can_transport
 from eggs_machina.hw_drivers.transport.can.usb2can_x2 import USB2CANX2
 from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum, Robstride_Control_Modes
 from eggs_machina.utils.robstride_robot import RoboRob
+from eggs_machina.hw_drivers.transport.can.types import CAN_Baud_Rate, CAN_Message
 import time
 from typing import Dict
 
@@ -56,7 +57,7 @@ def instantiate_single_transport(channel, baud_rate):
     return transport
 
 def instantiate_transports() -> Dict[str, Transport]:
-    baud = 1000000
+    baud = CAN_Baud_Rate.CAN_BAUD_1_MBS.value
     leader_transport = instantiate_single_transport(channel=LEADER_CHANNEL, baud_rate=baud)
     # follower_transport = instantiate_single_transport(channel=FOLLOWER_CHANNEL, baud_rate=baud)
     follower_transport = leader_transport
