@@ -58,4 +58,4 @@ if __name__ == "__main__":
     test_read_run_mode()
     test_position_max_speed_limit()
     test_read_position()
-    test_set_motor_id()
+    # test_set_motor_id()

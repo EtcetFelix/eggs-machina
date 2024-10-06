@@ -6,43 +6,100 @@ from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
 from eggs_machina.hw_drivers.transport.can.usb2can_x2 import USB2CANX2
-from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
+from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum, Robstride_Control_Modes
+from eggs_machina.utils.robstride_robot import RoboRob
+from eggs_machina.hw_drivers.transport.can.types import CAN_Baud_Rate, CAN_Message
 import time
+from typing import Dict
 
-def set_position(leader: Robstride, follower: Robstride):
+LEADER_CHANNEL = "can0"
+FOLLOWER_CHANNEL = "can0"
+
+LEADER_SERVO_IDS = [42, 44]
+FOLLOWER_SERVO_IDS = [50, 40]
+
+JOINT_MAPPING = {44:50, 42:40}
+
+HOST_ID = 0xFD
+
+def convert_leader_to_follower_joints(leader_position: Dict[int, float], servo_joint_mapping: Dict[int, int]) -> Dict[int, float]:
+    """
+    Figure out what motors on the follower to set positions to.    
+
+    :param servo_joint_mapping: Mapping of what joints on the leader correspond to what joints on the follower.
+        Keys are the can ids of the joints on the leader, values are the can id of joints on the follower.
+    :returns psoitions_to_set: keys are can ids of follower, values are position value to set
+    """
+    positions_to_set = {}
+    for leader_can_id, position in leader_position.items():
+        corresponding_follower_joint_id = servo_joint_mapping[leader_can_id]
+        positions_to_set[corresponding_follower_joint_id] = position
+    return positions_to_set
+
+
+def set_position(leader: RoboRob, follower: RoboRob, servo_joint_mapping: Dict[int, int]):
+    """
+    Set the position of the follower to the position of the leader.
+    
+    :param servo_joint_mapping: Mapping of what joints on the leader correspond to what joints on the follower.
+    Keys are the can ids of the joints on the leader, values are the can id of joints on the follower.
+    """
     print()
-    pos = leader.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+    pos = leader.read_position()
     print(f"Read pos:{pos}, writing to follower")
-    follower.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, pos)
-
-def instantiate_transport() -> Transport:
-    channel = "can1"
-    transport = USB2CANX2(channel=channel, baud_rate=1000000)
-    return transport, channel
-
-def shutdown_transport(transport: Transport, can_channel):
-    """Gracefully shutdown the transport channel."""
-    transport.close(can_channel)
+    positions_to_set = convert_leader_to_follower_joints(pos, servo_joint_mapping)
+    follower.set_position(positions_to_set)
 
 
-def instantiate_robots(transport: Transport) -> List[Any]:
+def instantiate_single_transport(channel, baud_rate):
+    transport = USB2CANX2(channel=channel, baud_rate=baud_rate)
+    transport.open()
+    return transport
+
+def instantiate_transports() -> Dict[str, Transport]:
+    baud = CAN_Baud_Rate.CAN_BAUD_1_MBS.value
+    leader_transport = instantiate_single_transport(channel=LEADER_CHANNEL, baud_rate=baud)
+    # follower_transport = instantiate_single_transport(channel=FOLLOWER_CHANNEL, baud_rate=baud)
+    follower_transport = leader_transport
+    transports = {LEADER_CHANNEL: leader_transport, FOLLOWER_CHANNEL: follower_transport}
+    return transports
+
+def shutdown_transports(transports: Dict[str, Transport]):
+    """Gracefully shutdown the transport channels."""
+    for channel, transport in transports.items():
+        transport.close(channel)
+
+
+def instantiate_robots(transports: Dict[str, Transport]) -> List[Any]:
     """Define and instantiate all robots used during teleop."""
     # transport =  can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS2, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
     # transport2 =  can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS1, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
     host_can_id = 0xFD
-    leader = Robstride(transport, host_can_id, motor_can_id=127)
-    follower = Robstride(transport, host_can_id, motor_can_id=126)
-    leader_bus_voltage = leader.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
-    print(f"leader_bus_voltage: {leader_bus_voltage}")
-    follower_bus_voltage = follower.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
-    print(f"follower_bus_voltage: {follower_bus_voltage}")
-    follower.write_single_param(Robstride_Param_Enum.RUN_MODE, 1)
-    leader.stop_motor()
-    follower.enable_motor()
+    leader_transport = transports[LEADER_CHANNEL]
+    follower_transport = transports[FOLLOWER_CHANNEL]
+    leader_servo_ids = LEADER_SERVO_IDS
+    follower_servo_ids = FOLLOWER_SERVO_IDS
+    leader_servos = {}
+    for can_id in leader_servo_ids:
+        leader_servos[can_id] = Robstride(host_can_id=HOST_ID, motor_can_id=can_id, can_transport=leader_transport)
+    leader = RoboRob(leader_servos)
+
+    follower_servos = {}
+    for can_id in follower_servo_ids:
+        follower_servos[can_id] = Robstride(host_can_id=HOST_ID, motor_can_id=can_id, can_transport=follower_transport)
+    follower = RoboRob(follower_servos)
+
+    print(leader.read_position())
+    print(follower.read_position())
+
+
+    follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
+    leader.stop_motors()
+    follower.enable_motors()
     time.sleep(0.05)   
-    set_position(leader, follower)
+    set_position(leader, follower, JOINT_MAPPING)
     time.sleep(1)
-    follower.stop_motor()  
+    follower.stop_motors()  
     return [leader, follower]
 
 
@@ -51,11 +108,11 @@ def start_teleop(leader: Robstride, follower: Robstride):
     teleop(leader, follower)
 
 
-def teleop(leader: Robstride, follower: Robstride):
+def teleop(leader: RoboRob, follower: RoboRob):
     """Start tele-operation."""
     while True:
-        follower.enable_motor()
-        set_position(leader, follower)
+        follower.enable_motors()
+        set_position(leader, follower, JOINT_MAPPING)
         time.sleep(0.05)
 
 
@@ -68,23 +125,23 @@ def main(robots):
 def shutdown_robots_gracefully(robots: List[Any]):
     """Gracefully turn off all robots."""
     for robot in robots:
-        robot.stop_motor()
+        robot.stop_motors()
 
 
 if __name__ == "__main__":
-    transport, channel = instantiate_transport()
-    robots = instantiate_robots(transport)
+    transports = instantiate_transports()
+    robots = instantiate_robots(transports)
     try:
         main(robots)
     except KeyboardInterrupt:
         print("Shutdown requested...exiting")
         shutdown_robots_gracefully(robots)
-        shutdown_transport(transport, channel)
+        shutdown_transports(transports)
         try:
             sys.exit(130)
         except SystemExit:
             os._exit(130)
     except Exception as e:
         print("Exception occurred, shutting down transport...")
-        shutdown_transport(transport, channel)
+        shutdown_transports(transports)
         print(e)
