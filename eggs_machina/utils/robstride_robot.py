@@ -6,7 +6,7 @@ from eggs_machina.hw_drivers.system.robstride.robstride_types import Robstride_P
 
 
 class RoboRob():
-    def __init__(self, servos: Dict[int, Robstride], baud_rate: int, transport: Transport):
+    def __init__(self, servos: Dict[int, Robstride]):
         """
         Class to handle multiple robstride servos.
 
