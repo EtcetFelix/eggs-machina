@@ -205,10 +205,6 @@ if __name__ == "__main__":
 
     # time.sleep(2)
     # robstride.stop_motor()
-    
-    # bus_voltage2 = robstride2.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
-    # print(bus_voltage2)
-    # robstride.set_motor_can_id(126)
 
     def test_position_control(robstride: Robstride):
         robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 1)
@@ -223,9 +219,6 @@ if __name__ == "__main__":
         print(pos)
 
     # test_position_control(robstride)
-    # robstride.write_single_param(Robstride_Param_Enum.RUN_MODE, 0)      
-    # control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)   # TODO: Fix reading empty frame for parameter right after changing it (such as in these 2 lines)
-    # print(control_mode)
 
     # transport.close()
 
