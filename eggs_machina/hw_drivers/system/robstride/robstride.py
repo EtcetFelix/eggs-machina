@@ -205,14 +205,7 @@ if __name__ == "__main__":
 
     # time.sleep(2)
     # robstride.stop_motor()
-
-    # control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)
-    # print(control_mode)
-    # max_speed = robstride.read_single_param(Robstride_Param_Enum.POSITION_MODE_SPEED_LIMIT)
-    # print(max_speed)
-    # pos = robstride.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
-    # print(pos)
-        
+    
     # bus_voltage2 = robstride2.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
     # print(bus_voltage2)
     # robstride.set_motor_can_id(126)
