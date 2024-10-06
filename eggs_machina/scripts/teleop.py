@@ -22,7 +22,7 @@ def instantiate_transport() -> Transport:
 
 def shutdown_transport(transport: Transport, can_channel):
     """Gracefully shutdown the transport channel."""
-    transport.close_channel(can_channel)
+    transport.close(can_channel)
 
 
 def instantiate_robots(transport: Transport) -> List[Any]:

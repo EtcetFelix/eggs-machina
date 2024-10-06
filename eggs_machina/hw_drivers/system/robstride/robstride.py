@@ -20,6 +20,7 @@ class Robstride(System):
         self.host_can_id = host_can_id
         self.motor_can_id = motor_can_id
         self.can_transport = can_transport
+        self.can_transport.open()
 
     def get_device_id(self):
         self._send_frame(
@@ -64,17 +65,17 @@ class Robstride(System):
             msg_type=Robstride_Msg_Enum.BAUD_RATE_CHANGE,
             data=data
         )
+        self.can_transport.close()
         # TODO - reinit transport with new baud rate
 
-    def _retry_read(self, response_id):
+    def _retry_read(self, response_id: int):
         """Retry reading a frame when it's empty."""
-        param_response_frame = None
+        param_response_frame = self._read_frame(response_id)
         attempts_to_try = 7
         attempts_tried = 1
-        while param_response_frame==None and attempts_tried<attempts_to_try:
-            # print(f"attempt {attempts_tried}: {param_response_frame}")
+        while param_response_frame == None and attempts_tried < attempts_to_try:
             param_response_frame = self._read_frame(response_id)
-            attempts_tried+=1
+            attempts_tried += 1
         return param_response_frame
 
     
@@ -232,5 +233,5 @@ if __name__ == "__main__":
     # control_mode = robstride.read_single_param(Robstride_Param_Enum.RUN_MODE)   # TODO: Fix reading empty frame for parameter right after changing it (such as in these 2 lines)
     # print(control_mode)
 
-    transport.close_channel(can_channel)
+    transport.close(can_channel)
 
