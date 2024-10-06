@@ -21,6 +21,7 @@ class USB2CANX2(Transport):
 
     def __enter__(self):
         os.system(f'sudo ifconfig {self.channel} up')
+        return self
 
     def __exit__(self, exctype: Optional[Type[BaseException]],
         excinst: Optional[BaseException],
