@@ -37,9 +37,9 @@ class Teleoperator:
         self.leader.stop_motors()
         self.run_operation = True
         
-        if self.thread is None or not self.thread.is_alive():
-            self.thread = threading.Thread(target=self._run, args=(delay_ms), daemon=True)
-            self.thread.start()
+        if self.teleop_thread is None or not self.teleop_thread.is_alive():
+            self.teleop_thread = threading.Thread(target=self._run, args=(delay_ms,), daemon=True)
+            self.teleop_thread.start()
 
     def _run(self, delay_ms: int):
         while self.run_operation:
@@ -57,8 +57,8 @@ class Teleoperator:
 
     def stop(self):
         self.run_operation = False
-        if self.thread:
-            self.thread.join()
+        if self.teleop_thread:
+            self.teleop_thread.join()
 
     def __del__(self):
         self.stop()
