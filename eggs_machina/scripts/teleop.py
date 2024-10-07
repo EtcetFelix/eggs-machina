@@ -48,7 +48,7 @@ class Teleoperator:
 
     def _set_position(self):
         leader_positions: Dict[Robstride, float] = self.leader.read_position()
-        for leader_robstride, position in leader_positions:
+        for leader_robstride, position in leader_positions.items():
             follower_robstride = self.joint_map.get(leader_robstride, None)
             if follower_robstride == None:
                 self.stop()
