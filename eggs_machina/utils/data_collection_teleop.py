@@ -7,11 +7,13 @@ from typing import Dict
 from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from numpy.typing import NDArray
 import numpy as np
+from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum, Robstride_Control_Modes
 
-TIMESTEP_LENGTH = 0.5
+
+TIMESTEP_LENGTH = 0.05
 
 class DataCollectionTeleop(Teleoperator):
-    def __init__(leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
+    def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
         super().__init__(leader, follower, joint_map) 
 
     def get_leader_action(self) -> Dict[Robstride, float]:
@@ -27,27 +29,22 @@ class DataCollectionTeleop(Teleoperator):
                 raise ValueError
             follower_robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, position)
     
-    def follower_observation():
+    def follower_observation(self):
         """Return the real observed action of follower."""
         # TODO: Get data feedback from follower and return
         pass
 
-    def get_reward():
+    def get_reward(self):
         return 0
 
     def step(self, action: NDArray[np.int32]) -> dm_env.TimeStep:
         """Set action of the follower bot and save its real returned actions."""
         leader_positions = action
-        self._set_position(self, leader_positions)
+        self._set_position(leader_positions)
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID,
             reward=self.get_reward(),
             discount=None,
             observation=self.follower_observation())
-    
-if __name__ == '__main__':
-    
 
-
-
-
+# TODO: add reset function
