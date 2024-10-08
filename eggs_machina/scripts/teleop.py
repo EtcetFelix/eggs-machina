@@ -171,6 +171,23 @@ def shutdown_robots_gracefully(robots: List[Any]):
 
 
 if __name__ == "__main__":
+    # transports = instantiate_transports()
+    # robots = instantiate_robots(transports)
+    # try:
+    #     main(robots)
+    # except KeyboardInterrupt:
+    #     print("Shutdown requested...exiting")
+    #     shutdown_robots_gracefully(robots)
+    #     shutdown_transports(transports)
+    #     try:
+    #         sys.exit(130)
+    #     except SystemExit:
+    #         os._exit(130)
+    # except Exception as e:
+    #     print("Exception occurred, shutting down transport...")
+    #     shutdown_transports(transports)
+    #     print(e)
+
     # All motors on single CAN transport
     transport = USB2CANX2(channel="can0", baud_rate=1000000)
     host_id = 0xFD
