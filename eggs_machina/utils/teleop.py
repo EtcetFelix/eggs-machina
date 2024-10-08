@@ -48,6 +48,8 @@ class Teleoperator:
 
     def stop(self):
         self.run_operation = False
+        self.leader.stop_motors()
+        self.follower.stop_motors()
         if self.teleop_thread:
             self.teleop_thread.join()
 
