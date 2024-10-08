@@ -56,9 +56,9 @@ if __name__ == "__main__":
     print("Started, GO!!!")
     teleoperator.follower.enable_motors()
     teleoperator.leader.stop_motors()
+    teleoperator.follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
     for _ in range(100):
         action = teleoperator.get_leader_action()
-        print(f"Position: {action.values()}")
         timestep = teleoperator.step(action)
         episode.append(timestep)
         time.sleep(0.05)
