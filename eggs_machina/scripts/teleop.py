@@ -12,6 +12,7 @@ from eggs_machina.utils.robstride_robot import RoboRob
 from eggs_machina.hw_drivers.transport.can.types import CAN_Baud_Rate, CAN_Message
 import time
 from typing import Dict
+from eggs_machina.utils.teleop import Teleoperator
 
 LEADER_CHANNEL = "can0"
 FOLLOWER_CHANNEL = "can0"
@@ -22,46 +23,6 @@ FOLLOWER_SERVO_IDS = [50, 40]
 JOINT_MAPPING = {44:50, 42:40}
 
 HOST_ID = 0xFD
-
-class Teleoperator:
-    def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
-        self.leader = leader
-        self.follower = follower
-        self.joint_map = joint_map
-        self.run_operation = False
-        self.teleop_thread = None
-
-    def run(self, delay_ms: int):
-        self.follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
-        self.follower.enable_motors()
-        self.leader.stop_motors()
-        self.run_operation = True
-        
-        if self.teleop_thread is None or not self.teleop_thread.is_alive():
-            self.teleop_thread = threading.Thread(target=self._run, args=(delay_ms,), daemon=True)
-            self.teleop_thread.start()
-
-    def _run(self, delay_ms: int):
-        while self.run_operation:
-            self._set_position()
-            time.sleep(delay_ms)
-
-    def _set_position(self):
-        leader_positions: Dict[Robstride, float] = self.leader.read_position()
-        for leader_robstride, position in leader_positions.items():
-            follower_robstride = self.joint_map.get(leader_robstride, None)
-            if follower_robstride == None:
-                self.stop()
-                raise ValueError
-            follower_robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, position)
-
-    def stop(self):
-        self.run_operation = False
-        if self.teleop_thread:
-            self.teleop_thread.join()
-
-    def __del__(self):
-        self.stop()
 
 
 def convert_leader_to_follower_joints(leader_position: Dict[int, float], servo_joint_mapping: Dict[int, int]) -> Dict[int, float]:
