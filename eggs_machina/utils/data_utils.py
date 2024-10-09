@@ -9,7 +9,7 @@ from eggs_machina.constants import NUM_JOINTS_ON_ROBOT, NUM_LEADER_ROBOTS
 TOTAL_NUM_LEADER_JOINTS = NUM_LEADER_ROBOTS * NUM_JOINTS_ON_ROBOT
 
 
-def prepare_data_for_export(camera_names, actions, timesteps):
+def prepare_data_for_export(camera_names, actions, timesteps) -> Dict[str, Any]:
     data_dict = {
         "/observations/qpos": [],
         "/observations/qvel": [],

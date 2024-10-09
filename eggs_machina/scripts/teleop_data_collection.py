@@ -13,8 +13,10 @@ from eggs_machina.hw_drivers.transport.can.types import CAN_Baud_Rate, CAN_Messa
 import time
 from typing import Dict
 from eggs_machina.utils.data_collection_teleop import DataCollectionTeleop
+from eggs_machina.utils.data_utils import prepare_data_for_export, create_dataset_path, save_to_hdf5
 
-
+DATASET_DIR = ""
+DATASET_FILENAME = ""
 
 if __name__ == "__main__":
      # All motors on single CAN transport
@@ -73,8 +75,11 @@ if __name__ == "__main__":
     # input("Press Enter to end teleop...")
     teleoperator.stop()
 
+    data_dict = prepare_data_for_export([], leader_actions, timesteps)
 
+    dataset_path = create_dataset_path(DATASET_DIR, DATASET_FILENAME, True)
 
+    save_to_hdf5(data_dict, dataset_path, [], 100)
 
 
 
