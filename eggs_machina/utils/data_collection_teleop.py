@@ -15,6 +15,7 @@ TIMESTEP_LENGTH = 0.05
 class DataCollectionTeleop(Teleoperator):
     def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
         super().__init__(leader, follower, joint_map) 
+        # TODO: Add effort (milliamps), and velocity (rads/second)
 
     def get_leader_action(self) -> Dict[Robstride, float]:
         """Get the action of the leader bot."""
