@@ -51,16 +51,22 @@ if __name__ == "__main__":
     )
 
     # teleoperator.run(delay_ms=0.05)
-    episode = []
-
     print("Started, GO!!!")
     teleoperator.follower.enable_motors()
     teleoperator.leader.stop_motors()
     teleoperator.follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
+    leader_actions = []
+    timestamp_history = []
+    timesteps = []
     for _ in range(100):
+        t0 = time.time()
         action = teleoperator.get_leader_action()
+        t1 = time.time()
         timestep = teleoperator.step(action)
-        episode.append(timestep)
+        t2 = time.time()
+        timesteps.append(timestep)
+        leader_actions.append(action)
+        timestamp_history.append([t0, t1, t2])
         time.sleep(0.05)
     # TODO: write commands to do teleop with data collection class
     # TODO: use data utils to save data properly
