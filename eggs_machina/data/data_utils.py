@@ -9,23 +9,30 @@ from eggs_machina.constants import NUM_JOINTS_ON_ROBOT, NUM_LEADER_ROBOTS
 TOTAL_NUM_LEADER_JOINTS = NUM_LEADER_ROBOTS * NUM_JOINTS_ON_ROBOT
 
 
+FOLLOWER_POSITION_OBSERVATION = "/observations/qpos"
+FOLLOWER_VELOCITY_OBSERVATION = "/observations/qvel"
+FOLLOWER_EFFORT_OBSERVATION = "/observations/effort"
+LEADER_ACTION = "/action"
+IMAGES_OBSERVATION = "/observations/images/"
+
+
 def prepare_data_for_export(camera_names, actions, timesteps) -> Dict[str, Any]:
     data_dict = {
-        "/observations/qpos": [],
-        "/observations/qvel": [],
-        "/observations/effort": [],
-        "/action": [],
+        FOLLOWER_POSITION_OBSERVATION: [],
+        FOLLOWER_VELOCITY_OBSERVATION: [],
+        FOLLOWER_EFFORT_OBSERVATION: [],
+        LEADER_ACTION: [],
     }
     for cam_name in camera_names:
-        data_dict[f"/observations/images/{cam_name}"] = []
+        data_dict[f"{IMAGES_OBSERVATION}{cam_name}"] = []
 
     while actions:
         action = actions.pop(0)
         timestep = timesteps.pop(0)
-        data_dict["/observations/qpos"].append(timestep.observation["qpos"])
-        data_dict["/action"].append(action)
+        data_dict[FOLLOWER_POSITION_OBSERVATION].append(timestep.observation["qpos"])
+        data_dict[LEADER_ACTION].append(action)
         for cam_name in camera_names:
-            data_dict[f"/observations/images/{cam_name}"].append(
+            data_dict[f"{IMAGES_OBSERVATION}{cam_name}"].append(
                 timestep.observation["images"][cam_name]
             )
     return data_dict
