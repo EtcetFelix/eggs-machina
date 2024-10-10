@@ -13,7 +13,7 @@ from eggs_machina.hw_drivers.transport.can.types import CAN_Baud_Rate, CAN_Messa
 import time
 from typing import Dict
 from eggs_machina.utils.data_collection_teleop import DataCollectionTeleop
-from eggs_machina.utils.data_utils import prepare_data_for_export, create_dataset_path, save_to_hdf5
+from eggs_machina.data.data_utils import prepare_data_for_export, create_dataset_path, save_to_hdf5
 
 DATASET_DIR = ""
 DATASET_FILENAME = ""
