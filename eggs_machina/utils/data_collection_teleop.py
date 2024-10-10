@@ -49,6 +49,9 @@ class DataCollectionTeleop(Teleoperator):
     def _follower_observation(self):
         """Return the real observed action of follower."""
         # TODO: Get data feedback from follower and return
+        # Get effort in milliamps
+        # Get position in rads
+        # Get velocity in rads/sec
         pass
 
     def get_reward(self):
