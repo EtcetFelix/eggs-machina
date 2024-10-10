@@ -9,6 +9,8 @@ from numpy.typing import NDArray
 import numpy as np
 from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum, Robstride_Control_Modes
 import time
+import collections
+from eggs_machina.data.data_collected import DataSaved
 
 TIMESTEP_LENGTH = 0.05
 
@@ -45,13 +47,31 @@ class DataCollectionTeleop(Teleoperator):
                 self.stop()
                 raise ValueError
             follower_robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, position)
+
+
+    # TODO: move these to robstride or roborob class
+    def _get_effort(self):
+        """Get effort feedback from every servo in the follower."""
+        # TODO: implement 
+        pass
+
+    def _get_positions(self):
+        """Get position feedback from every servo in the follower."""
+        # TODO: implement
+        pass
+
+    def _get_velocity(self):
+        """Get velocity feedback from every servo in the follower."""
+        # TODO: implement
+        pass
     
-    def _follower_observation(self):
+    def _follower_observation(self) -> collections.OrderedDict:
         """Return the real observed action of follower."""
-        # TODO: Get data feedback from follower and return
-        # Get effort in milliamps
-        # Get position in rads
-        # Get velocity in rads/sec
+        observation = collections.OrderedDict()
+        observation[DataSaved.FOLLOWER_EFFORT.value] = self._get_effort()
+        observation[DataSaved.FOLLOWER_POSITION.value] = self._get_positions()
+        observation[DataSaved.FOLLOWER_VELOCITY.value] = self._get_velocity()
+        # TODO: get images and save to observation
         pass
 
     def get_reward(self):
