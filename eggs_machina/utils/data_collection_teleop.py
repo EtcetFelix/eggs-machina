@@ -17,23 +17,23 @@ class DataCollectionTeleop(Teleoperator):
         super().__init__(leader, follower, joint_map) 
         # TODO: Add effort (milliamps), and velocity (rads/second)
     
-    def run(self):
+    def run(self, delay_s: int):
         leader_actions = []
         timestamp_history = []
         timesteps = []
         for _ in range(100):
             t0 = time.time()
-            action = self.get_leader_action()
+            action = self._get_leader_action()
             t1 = time.time()
-            timestep = self.step(action)
+            timestep = self._step(action)
             t2 = time.time()
             timesteps.append(timestep)
             leader_actions.append(action)
             timestamp_history.append([t0, t1, t2])
-            time.sleep(0.05)
+            time.sleep(delay_s)
         return leader_actions, timestamp_history, timesteps
 
-    def get_leader_action(self) -> Dict[Robstride, float]:
+    def _get_leader_action(self) -> Dict[Robstride, float]:
         """Get the action of the leader bot."""
         leader_positions: Dict[Robstride, float] = self.leader.read_position()
         return leader_positions
@@ -46,7 +46,7 @@ class DataCollectionTeleop(Teleoperator):
                 raise ValueError
             follower_robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, position)
     
-    def follower_observation(self):
+    def _follower_observation(self):
         """Return the real observed action of follower."""
         # TODO: Get data feedback from follower and return
         pass
@@ -54,7 +54,7 @@ class DataCollectionTeleop(Teleoperator):
     def get_reward(self):
         return 0
 
-    def step(self, action: NDArray[np.int32]) -> dm_env.TimeStep:
+    def _step(self, action: NDArray[np.int32]) -> dm_env.TimeStep:
         """Set action of the follower bot and save its real returned actions."""
         leader_positions = action
         self._set_position(leader_positions)
@@ -62,6 +62,6 @@ class DataCollectionTeleop(Teleoperator):
             step_type=dm_env.StepType.MID,
             reward=self.get_reward(),
             discount=None,
-            observation=self.follower_observation())
+            observation=self._follower_observation())
 
 # TODO: add reset function
