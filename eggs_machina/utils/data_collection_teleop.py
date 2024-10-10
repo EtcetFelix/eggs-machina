@@ -8,7 +8,7 @@ from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from numpy.typing import NDArray
 import numpy as np
 from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum, Robstride_Control_Modes
-
+import time
 
 TIMESTEP_LENGTH = 0.05
 
@@ -16,6 +16,22 @@ class DataCollectionTeleop(Teleoperator):
     def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
         super().__init__(leader, follower, joint_map) 
         # TODO: Add effort (milliamps), and velocity (rads/second)
+    
+    def run(self):
+        leader_actions = []
+        timestamp_history = []
+        timesteps = []
+        for _ in range(100):
+            t0 = time.time()
+            action = self.get_leader_action()
+            t1 = time.time()
+            timestep = self.step(action)
+            t2 = time.time()
+            timesteps.append(timestep)
+            leader_actions.append(action)
+            timestamp_history.append([t0, t1, t2])
+            time.sleep(0.05)
+        return leader_actions, timestamp_history, timesteps
 
     def get_leader_action(self) -> Dict[Robstride, float]:
         """Get the action of the leader bot."""
