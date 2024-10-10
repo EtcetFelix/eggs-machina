@@ -72,7 +72,7 @@ class DataCollectionTeleop(Teleoperator):
         observation[DataSaved.FOLLOWER_POSITION.value] = self._get_positions()
         observation[DataSaved.FOLLOWER_VELOCITY.value] = self._get_velocity()
         # TODO: get images and save to observation
-        pass
+        return observation
 
     def get_reward(self):
         return 0
