@@ -18,6 +18,7 @@ from eggs_machina.utils.data_utils import prepare_data_for_export, create_datase
 DATASET_DIR = ""
 DATASET_FILENAME = ""
 
+
 if __name__ == "__main__":
      # All motors on single CAN transport
     transport = USB2CANX2(channel="can0", baud_rate=1000000)
@@ -54,9 +55,7 @@ if __name__ == "__main__":
 
     # teleoperator.run(delay_ms=0.05)
     print("Started, GO!!!")
-    teleoperator.follower.enable_motors()
-    teleoperator.leader.stop_motors()
-    teleoperator.follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
+    teleoperator.prepare_servos()
     leader_actions = []
     timestamp_history = []
     timesteps = []
