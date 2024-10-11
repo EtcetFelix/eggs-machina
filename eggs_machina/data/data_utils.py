@@ -11,30 +11,30 @@ from eggs_machina.constants import NUM_JOINTS_ON_ROBOT, NUM_LEADER_ROBOTS
 TOTAL_NUM_LEADER_JOINTS = NUM_LEADER_ROBOTS * NUM_JOINTS_ON_ROBOT
 
 
-FOLLOWER_POSITION_OBSERVATION = f"/observations/{DataSaved.FOLLOWER_POSITION.value}"
-FOLLOWER_VELOCITY_OBSERVATION = f"/observations/{DataSaved.FOLLOWER_VELOCITY.value}"
-FOLLOWER_EFFORT_OBSERVATION = f"/observations/{DataSaved.FOLLOWER_EFFORT.value}"
-LEADER_ACTION = f"/{DataSaved.LEADER_ACTION.value}"
-IMAGES_OBSERVATION = f"/observations/{DataSaved.IMAGES.value}/"
+FOLLOWER_POSITION_HDF5_GROUP = f"/observations/{DataSaved.FOLLOWER_POSITION.value}"
+FOLLOWER_VELOCITY_HDF5_GROUP = f"/observations/{DataSaved.FOLLOWER_VELOCITY.value}"
+FOLLOWER_EFFORT_HDF5_GROUP = f"/observations/{DataSaved.FOLLOWER_EFFORT.value}"
+LEADER_ACTION_HDF5_GROUP = f"/{DataSaved.LEADER_ACTION.value}"
+IMAGES_HDF5_GROUP = f"/observations/{DataSaved.IMAGES.value}/"
 
 
 def prepare_data_for_export(camera_names, actions, timesteps) -> Dict[str, Any]:
     data_dict = {
-        FOLLOWER_POSITION_OBSERVATION: [],
-        FOLLOWER_VELOCITY_OBSERVATION: [],
-        FOLLOWER_EFFORT_OBSERVATION: [],
-        LEADER_ACTION: [],
+        FOLLOWER_POSITION_HDF5_GROUP: [],
+        FOLLOWER_VELOCITY_HDF5_GROUP: [],
+        FOLLOWER_EFFORT_HDF5_GROUP: [],
+        LEADER_ACTION_HDF5_GROUP: [],
     }
     for cam_name in camera_names:
-        data_dict[f"{IMAGES_OBSERVATION}{cam_name}"] = []
+        data_dict[f"{IMAGES_HDF5_GROUP}{cam_name}"] = []
 
     while actions:
         action = actions.pop(0)
         timestep = timesteps.pop(0)
-        data_dict[FOLLOWER_POSITION_OBSERVATION].append(timestep.observation[DataSaved.FOLLOWER_POSITION.value])
-        data_dict[LEADER_ACTION].append(action)
+        data_dict[FOLLOWER_POSITION_HDF5_GROUP].append(timestep.observation[DataSaved.FOLLOWER_POSITION.value])
+        data_dict[LEADER_ACTION_HDF5_GROUP].append(action)
         for cam_name in camera_names:
-            data_dict[f"{IMAGES_OBSERVATION}{cam_name}"].append(
+            data_dict[f"{IMAGES_HDF5_GROUP}{cam_name}"].append(
                 timestep.observation[DataSaved.IMAGES.value][cam_name]
             )
     return data_dict
