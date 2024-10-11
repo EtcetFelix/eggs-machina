@@ -19,11 +19,11 @@ class DataCollectionTeleop(Teleoperator):
         super().__init__(leader, follower, joint_map) 
         # TODO: Add effort (milliamps), and velocity (rads/second)
     
-    def run(self, delay_s: int):
+    def run(self, delay_s: int, num_timesteps: int):
         leader_actions = []
         timestamp_history = []
         timesteps = []
-        for _ in range(100):
+        for _ in range(num_timesteps):
             t0 = time.time()
             action = self._get_leader_action()
             t1 = time.time()
