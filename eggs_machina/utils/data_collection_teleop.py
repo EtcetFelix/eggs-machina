@@ -3,7 +3,7 @@
 from eggs_machina.utils.teleop import Teleoperator
 import dm_env
 from eggs_machina.utils.robstride_robot import RoboRob
-from typing import Dict
+from typing import Dict, Literal
 from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from numpy.typing import NDArray
 import numpy as np
@@ -74,7 +74,7 @@ class DataCollectionTeleop(Teleoperator):
         # TODO: get images and save to observation
         return observation
 
-    def get_reward(self):
+    def get_reward(self) -> Literal[0]:
         return 0
 
     def _step(self, action: NDArray[np.int32]) -> dm_env.TimeStep:
@@ -85,6 +85,9 @@ class DataCollectionTeleop(Teleoperator):
             step_type=dm_env.StepType.MID,
             reward=self.get_reward(),
             discount=None,
-            observation=self._follower_observation())
+            observation=self.follower_observation())
 
-# TODO: add reset function
+
+    def reset(self):
+        """Reset teleop environment."""
+        pass
