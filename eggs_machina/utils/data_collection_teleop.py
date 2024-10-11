@@ -44,4 +44,7 @@ class DataCollectionTeleop(Teleoperator):
             discount=None,
             observation=self.follower_observation())
 
-# TODO: add reset function
+
+    def reset(self):
+        """Reset teleop environment."""
+        pass
