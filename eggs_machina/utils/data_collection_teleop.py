@@ -3,7 +3,7 @@
 from eggs_machina.utils.teleop import Teleoperator
 import dm_env
 from eggs_machina.utils.robstride_robot import RoboRob
-from typing import Dict
+from typing import Dict, Literal
 from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from numpy.typing import NDArray
 import numpy as np
@@ -34,7 +34,7 @@ class DataCollectionTeleop(Teleoperator):
         # TODO: Get data feedback from follower and return
         pass
 
-    def get_reward(self):
+    def get_reward(self) -> Literal[0]:
         return 0
 
     def step(self, action: NDArray[np.int32]) -> dm_env.TimeStep:
