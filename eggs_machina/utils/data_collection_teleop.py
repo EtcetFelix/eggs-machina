@@ -9,9 +9,6 @@ from numpy.typing import NDArray
 import numpy as np
 from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum, Robstride_Control_Modes
 
-
-TIMESTEP_LENGTH = 0.05
-
 class DataCollectionTeleop(Teleoperator):
     def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
         super().__init__(leader, follower, joint_map) 
