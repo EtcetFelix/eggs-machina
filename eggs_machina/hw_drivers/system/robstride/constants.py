@@ -23,7 +23,7 @@ ROBSTRIDE_PARMS = {
     Robstride_Param_Enum.MECH_VEL_END_COIL: Robstride_Param_Type("MechVel", 0x701B, c_float, 4, -44, 44, False),
     Robstride_Param_Enum.VBUS_VOLTAGE: Robstride_Param_Type("VBUS", 0x701C, c_float, 4, MIN_FLOAT_32, MAX_FLOAT_32, False),
     Robstride_Param_Enum.NUM_ROTATIONS: Robstride_Param_Type("Rotation", 0x701D, c_short, 2, -2 ** 15, 2 ** 15 - 1, True),
-    Robstride_Param_Enum.POSITION_KP: Robstride_Param_Type("Loc_Kp", 0x701E, c_float, 2, MIN_FLOAT_32, MAX_FLOAT_32, True),
-    Robstride_Param_Enum.SPEED_KP: Robstride_Param_Type("Spd_Kp", 0x701F, c_float, 2, MIN_FLOAT_32, MAX_FLOAT_32, True),
-    Robstride_Param_Enum.SPEED_KI: Robstride_Param_Type("Spd_Ki", 0x7020, c_float, 2, MIN_FLOAT_32,MAX_FLOAT_32, True),
+    Robstride_Param_Enum.POSITION_KP: Robstride_Param_Type("Loc_Kp", 0x701E, c_float, 4, MIN_FLOAT_32, MAX_FLOAT_32, True),
+    Robstride_Param_Enum.SPEED_KP: Robstride_Param_Type("Spd_Kp", 0x701F, c_float, 4, MIN_FLOAT_32, MAX_FLOAT_32, True),
+    Robstride_Param_Enum.SPEED_KI: Robstride_Param_Type("Spd_Ki", 0x7020, c_float, 4, MIN_FLOAT_32,MAX_FLOAT_32, True),
 }
