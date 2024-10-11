@@ -3,7 +3,7 @@
 from eggs_machina.utils.teleop import Teleoperator
 import dm_env
 from eggs_machina.utils.robstride_robot import RoboRob
-from typing import Dict, Literal
+from typing import Dict, Literal, Any
 from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from numpy.typing import NDArray
 import numpy as np
@@ -11,6 +11,7 @@ from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackRes
 import time
 import collections
 from eggs_machina.data.data_collected import DataSaved
+from eggs_machina.data.image_collection import get_images
 
 TIMESTEP_LENGTH = 0.05
 
@@ -64,6 +65,12 @@ class DataCollectionTeleop(Teleoperator):
         """Get velocity feedback from every servo in the follower."""
         # TODO: implement
         pass
+
+    def _get_images() -> Dict[str, NDArray[Any]]:
+        """Get images from cameras in the follower."""
+        # TODO: implement, get images from all the cameras and 
+        images = get_images()
+        return images
     
     def _follower_observation(self) -> collections.OrderedDict:
         """Return the real observed action of follower."""
@@ -71,7 +78,7 @@ class DataCollectionTeleop(Teleoperator):
         observation[DataSaved.FOLLOWER_EFFORT.value] = self._get_effort()
         observation[DataSaved.FOLLOWER_POSITION.value] = self._get_positions()
         observation[DataSaved.FOLLOWER_VELOCITY.value] = self._get_velocity()
-        # TODO: get images and save to observation
+        observation[DataSaved.IMAGES.value] = self._get_images()
         return observation
 
     def get_reward(self) -> Literal[0]:
