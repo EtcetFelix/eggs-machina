@@ -85,7 +85,7 @@ class DataCollectionTeleop(Teleoperator):
             step_type=dm_env.StepType.MID,
             reward=self.get_reward(),
             discount=None,
-            observation=self.follower_observation())
+            observation=self._follower_observation())
 
 
     def reset(self):
