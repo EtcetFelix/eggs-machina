@@ -13,7 +13,10 @@ from eggs_machina.hw_drivers.transport.can.types import CAN_Baud_Rate, CAN_Messa
 import time
 from typing import Dict
 from eggs_machina.utils.data_collection_teleop import DataCollectionTeleop
+from eggs_machina.data.data_utils import prepare_data_for_export, create_dataset_path, save_to_hdf5
 
+DATASET_DIR = ""
+DATASET_FILENAME = ""
 
 
 if __name__ == "__main__":
@@ -51,24 +54,17 @@ if __name__ == "__main__":
     )
 
     # teleoperator.run(delay_ms=0.05)
-    episode = []
-
     print("Started, GO!!!")
-    teleoperator.follower.enable_motors()
-    teleoperator.leader.stop_motors()
-    teleoperator.follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
-    for _ in range(100):
-        action = teleoperator.get_leader_action()
-        timestep = teleoperator.step(action)
-        episode.append(timestep)
-        time.sleep(0.05)
-    # TODO: write commands to do teleop with data collection class
-    # TODO: use data utils to save data properly
+    teleoperator.prepare_servos()
+    leader_actions, timestamp_history, timesteps = teleoperator.run()
     # input("Press Enter to end teleop...")
     teleoperator.stop()
 
+    data_dict = prepare_data_for_export([], leader_actions, timesteps)
 
+    dataset_path = create_dataset_path(DATASET_DIR, DATASET_FILENAME, True)
 
+    save_to_hdf5(data_dict, dataset_path, [], 100)
 
 
 

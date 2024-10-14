@@ -21,11 +21,15 @@ class Teleoperator:
         self.joint_map = joint_map
         self.run_operation = False
         self.teleop_thread = None
-
-    def run(self, delay_ms: int):
+    
+    def prepare_servos(self):
         self.follower.set_control_mode(Robstride_Control_Modes.POSITION_MODE)
         self.follower.enable_motors()
         self.leader.stop_motors()
+    
+
+    def run(self, delay_ms: int):
+        self.prepare_servos()
         self.run_operation = True
         
         if self.teleop_thread is None or not self.teleop_thread.is_alive():
