@@ -71,7 +71,6 @@ class DataCollectionTeleop(Teleoperator):
 
     def _get_images(self) -> Dict[str, NDArray[Any]]:
         """Get images from cameras in the follower."""
-        # TODO: implement, get images from all the cameras
         images = self.image_collector.get_images()
         return images
     
