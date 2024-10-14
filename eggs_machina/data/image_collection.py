@@ -52,10 +52,6 @@ class ImageCollector:
         if not ret:
             raise FrameNotReadError("Error: Could not read frame.")
 
-        # Display the captured frame
-        cv2.imshow('Camera Image', frame)
-        cv2.waitKey(0)  # Wait indefinitely for a key press
-
         cv2.destroyAllWindows()
         return frame
     
