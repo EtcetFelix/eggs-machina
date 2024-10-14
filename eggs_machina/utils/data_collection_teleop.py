@@ -11,19 +11,22 @@ from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackRes
 import time
 import collections
 from eggs_machina.data.data_collected import DataSaved
-from eggs_machina.data.image_collection import get_images
+from eggs_machina.data.image_collection import ImageCollector
 
 TIMESTEP_LENGTH = 0.05
 
 class DataCollectionTeleop(Teleoperator):
     def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
         super().__init__(leader, follower, joint_map) 
+        camera_names = {"camera1": 0, "camera2": 1}
+        self.image_collector = ImageCollector(camera_names)
         # TODO: Add effort (milliamps), and velocity (rads/second)
     
     def run(self, delay_s: int, num_timesteps: int):
         leader_actions = []
         timestamp_history = []
         timesteps = []
+        self.image_collector.start_cameras()
         for _ in range(num_timesteps):
             t0 = time.time()
             action = self._get_leader_action()
@@ -66,10 +69,10 @@ class DataCollectionTeleop(Teleoperator):
         # TODO: implement
         pass
 
-    def _get_images() -> Dict[str, NDArray[Any]]:
+    def _get_images(self) -> Dict[str, NDArray[Any]]:
         """Get images from cameras in the follower."""
         # TODO: implement, get images from all the cameras
-        images = get_images()
+        images = self.image_collector.get_images()
         return images
     
     def _follower_observation(self) -> collections.OrderedDict:
