@@ -33,6 +33,8 @@ def prepare_data_for_export(camera_names, actions, timesteps) -> Dict[str, Any]:
         action = actions.pop(0)
         timestep = timesteps.pop(0)
         data_dict[FOLLOWER_POSITION_HDF5_GROUP].append(timestep.observation[DataSaved.FOLLOWER_POSITION.value])
+        data_dict[FOLLOWER_VELOCITY_HDF5_GROUP].append(timestep.observation[DataSaved.FOLLOWER_VELOCITY.value])
+        data_dict[FOLLOWER_EFFORT_HDF5_GROUP].append(timestep.observation[DataSaved.FOLLOWER_EFFORT.value])
         data_dict[LEADER_ACTION_HDF5_GROUP].append(action)
         for cam_name in camera_names:
             data_dict[f"{IMAGES_HDF5_GROUP}{cam_name}"].append(
