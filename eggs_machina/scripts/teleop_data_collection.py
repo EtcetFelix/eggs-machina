@@ -56,7 +56,8 @@ if __name__ == "__main__":
     # teleoperator.run(delay_ms=0.05)
     print("Started, GO!!!")
     teleoperator.prepare_servos()
-    leader_actions, timestamp_history, timesteps = teleoperator.run()
+    delay_s = 0.05
+    leader_actions, timestamp_history, timesteps = teleoperator.run(delay_s, 100)
     # input("Press Enter to end teleop...")
     teleoperator.stop()
 
