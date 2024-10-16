@@ -34,13 +34,26 @@ class DataCollectionTeleop(Teleoperator):
             timestep = self._step(action)
             t2 = time.time()
             timesteps.append(timestep)
-            leader_actions.append(action)
+            leader_action_by_can_id = self._format_leader_action_for_data_saving(action)
+            leader_actions.append(leader_action_by_can_id)
             timestamp_history.append([t0, t1, t2])
             time.sleep(delay_s)
         return leader_actions, timestamp_history, timesteps
+    
+    def _format_leader_action_for_data_saving(self, leader_action: Dict[Robstride, float]) -> Dict[int, float]:
+        """Convert keys in leader action feedback to the servo's can id."""
+        leader_positions_by_can_id = {}
+        for robstride, position in leader_action.items():
+            leader_positions_by_can_id[robstride.motor_can_id] = position
+        return leader_positions_by_can_id
+        
 
-    def _get_leader_action(self) -> Dict[Robstride, float]:
-        """Get the action of the leader bot."""
+    def _get_leader_action(self) -> Dict[int, float]:
+        """
+        Get the action of the leader bot.
+
+        :returns lead_positions_by_can_id: keys are the motor can id, values are positions in rads.
+        """
         leader_positions: Dict[Robstride, float] = self.leader.read_position()
         return leader_positions
 
