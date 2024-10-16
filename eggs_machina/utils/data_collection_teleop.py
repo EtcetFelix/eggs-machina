@@ -3,7 +3,7 @@
 from eggs_machina.utils.teleop import Teleoperator
 import dm_env
 from eggs_machina.utils.robstride_robot import RoboRob
-from typing import Dict, Literal, Any
+from typing import Dict, Literal, Any, List
 from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from numpy.typing import NDArray
 import numpy as np
@@ -26,7 +26,7 @@ class DataCollectionTeleop(Teleoperator):
         leader_actions = []
         timestamp_history = []
         timesteps = []
-        self.image_collector.start_cameras()
+        # self.image_collector.start_cameras()
         for _ in range(num_timesteps):
             t0 = time.time()
             action = self._get_leader_action()
@@ -53,21 +53,30 @@ class DataCollectionTeleop(Teleoperator):
             follower_robstride.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, position)
 
 
-    # TODO: move these to robstride or roborob class
-    def _get_effort(self):
-        """Get effort feedback from every servo in the follower."""
-        # TODO: implement 
-        pass
+    def _get_effort(self, feedback_responses: Dict[Robstride, FeedbackResp]) -> List[float]:
+        """
+        Get effort feedback from every servo in the follower.
 
-    def _get_positions(self):
+        :returns efforts: Torque values in NM from every robstride servo
+        """
+        #TODO: fix mapping of which servos are which joints and return in correct order
+        responses: List[FeedbackResp] = list(feedback_responses.values())
+        efforts = [response.torque_nm for response in responses]
+        return efforts
+
+    def _get_positions(self, feedback_responses: Dict[Robstride, FeedbackResp]):
         """Get position feedback from every servo in the follower."""
-        # TODO: implement
-        pass
+        responses: List[FeedbackResp] = list(feedback_responses.values())
+        positions = [response.angle_deg for response in responses]
+        #TODO: fix mapping of which servos are which joints and return in correct order
+        return positions
 
-    def _get_velocity(self):
+    def _get_velocity(self, feedback_responses: Dict[Robstride, FeedbackResp]):
         """Get velocity feedback from every servo in the follower."""
-        # TODO: implement
-        pass
+        #TODO: fix mapping of which servos are which joints and return in correct order
+        responses: List[FeedbackResp] = list(feedback_responses.values())
+        velocities = [response.velocity_rads for response in responses]
+        return velocities
 
     def _get_images(self) -> Dict[str, NDArray[Any]]:
         """Get images from cameras in the follower."""
@@ -77,10 +86,11 @@ class DataCollectionTeleop(Teleoperator):
     def _follower_observation(self) -> collections.OrderedDict:
         """Return the real observed action of follower."""
         observation = collections.OrderedDict()
-        observation[DataSaved.FOLLOWER_EFFORT.value] = self._get_effort()
-        observation[DataSaved.FOLLOWER_POSITION.value] = self._get_positions()
-        observation[DataSaved.FOLLOWER_VELOCITY.value] = self._get_velocity()
-        observation[DataSaved.IMAGES.value] = self._get_images()
+        follower_feedback = self.follower.get_feedback()
+        observation[DataSaved.FOLLOWER_EFFORT.value] = self._get_effort(follower_feedback)
+        observation[DataSaved.FOLLOWER_POSITION.value] = self._get_positions(follower_feedback)
+        observation[DataSaved.FOLLOWER_VELOCITY.value] = self._get_velocity(follower_feedback)
+        # observation[DataSaved.IMAGES.value] = self._get_images()
         return observation
 
     def get_reward(self) -> Literal[0]:
