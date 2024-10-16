@@ -3,6 +3,7 @@ import os
 import time
 from typing import Any, Dict, List
 from eggs_machina.data.data_collected import DataSaved
+import json
 
 import h5py
 
@@ -38,6 +39,13 @@ def prepare_data_for_export(camera_names, actions, timesteps) -> Dict[str, Any]:
                 timestep.observation[DataSaved.IMAGES.value][cam_name]
             )
     return data_dict
+
+def save_to_json(data_dict: Dict[str, Any], dataset_path: str):
+    """Save data_dict to a JSON file at dataset_path."""
+    t0 = time.time()
+    with open(dataset_path, 'w') as f:
+        json.dump(data_dict, f, indent=4)
+    print(f"Saving JSON: {time.time() - t0:.1f} secs")
 
 
 def create_dataset_path(dataset_dir, dataset_filename: str, overwrite: bool) -> str:
