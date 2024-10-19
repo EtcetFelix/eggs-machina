@@ -1,7 +1,7 @@
 from typing import Dict
 from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from eggs_machina.hw_drivers.transport.base import Transport
-from eggs_machina.hw_drivers.system.robstride.robstride_types import Robstride_Param_Enum, Robstride_Control_Modes
+from eggs_machina.hw_drivers.system.robstride.robstride_types import Robstride_Param_Enum, Robstride_Control_Modes, FeedbackResp
 
 
 
@@ -14,6 +14,12 @@ class RoboRob():
         is an instance of the Robstride class.
         """
         self.servos = servos
+
+    def get_feedback(self) -> Dict[Robstride, FeedbackResp]:
+        feedback_responses = {}
+        for can_id, servo in self.servos.items():
+            feedback_responses[servo] = servo.get_motor_feedback_frame()
+        return feedback_responses
 
 
     def read_position(self) -> Dict[Robstride, float]:

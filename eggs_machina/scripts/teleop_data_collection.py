@@ -13,13 +13,17 @@ from eggs_machina.hw_drivers.transport.can.types import CAN_Baud_Rate, CAN_Messa
 import time
 from typing import Dict
 from eggs_machina.utils.data_collection_teleop import DataCollectionTeleop
-from eggs_machina.data.data_utils import prepare_data_for_export, create_dataset_path, save_to_hdf5
+from eggs_machina.data.data_utils import prepare_data_for_export, create_dataset_path, save_to_hdf5, save_to_json
 
-DATASET_DIR = ""
-DATASET_FILENAME = ""
+DATASET_DIR = "/home/abohannon/Desktop"
+DATASET_FILENAME = "ACT_DATA.hdf5"
+JSON_DUMP_FILENAME = "ACT_DATA.json"
 
 
 if __name__ == "__main__":
+    dataset_path = create_dataset_path(DATASET_DIR, DATASET_FILENAME, True)
+    json_data_dump_path = create_dataset_path(DATASET_DIR, JSON_DUMP_FILENAME, True)
+
      # All motors on single CAN transport
     transport = USB2CANX2(channel="can0", baud_rate=1000000)
     host_id = 0xFD
@@ -56,13 +60,14 @@ if __name__ == "__main__":
     # teleoperator.run(delay_ms=0.05)
     print("Started, GO!!!")
     teleoperator.prepare_servos()
-    leader_actions, timestamp_history, timesteps = teleoperator.run()
+    delay_s = 0.05
+    leader_actions, timestamp_history, timesteps = teleoperator.run(delay_s, 100)
     # input("Press Enter to end teleop...")
     teleoperator.stop()
 
     data_dict = prepare_data_for_export([], leader_actions, timesteps)
+    save_to_json(data_dict, json_data_dump_path)
 
-    dataset_path = create_dataset_path(DATASET_DIR, DATASET_FILENAME, True)
 
     save_to_hdf5(data_dict, dataset_path, [], 100)
 
