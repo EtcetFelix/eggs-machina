@@ -79,3 +79,15 @@ class Robstride_Param_Enum(Enum):
     POSITION_KP = 15
     SPEED_KP = 16
     SPEED_KI = 17
+
+
+class Robstride_Control_Modes(Enum):
+    """
+    Methods of controlling the motor. 
+
+    Be careful with Operation mode when there's no load.
+    """
+    OPERATION_MODE = 0
+    POSITION_MODE = 1
+    SPEED_MODE = 2
+    CURRENT_MODE = 3

@@ -7,7 +7,7 @@ from eggs_machina.constants import (
     DELTA_TIME_STEP,
     TASK_CONFIGS,
 )
-from eggs_machina.utils.data_utils import (
+from eggs_machina.data.data_utils import (
     create_dataset_path,
     prepare_data_for_export,
     save_to_hdf5,

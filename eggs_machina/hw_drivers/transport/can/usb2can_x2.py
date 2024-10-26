@@ -1,5 +1,7 @@
 """The driver for using the USB2CAN-X2 device by innomaker."""
 
+from types import TracebackType
+from typing import Optional, Type
 from eggs_machina.hw_drivers.transport.base import Transport
 import can
 import os
@@ -16,7 +18,23 @@ class USB2CANX2(Transport):
         self.channel = channel
         self.interface = 'socketcan'
         self.bus = can.interface.Bus(channel=self.channel, interface=self.interface)
-        
+
+    def __enter__(self):
+        os.system(f'sudo ifconfig {self.channel} up')
+        return self
+
+    def __exit__(self, exctype: Optional[Type[BaseException]],
+        excinst: Optional[BaseException],
+        exctb: Optional[TracebackType]
+    ) -> bool:
+        os.system(f'sudo ifconfig {self.channel} down')
+        self.bus.shutdown()
+
+    def open(self):
+        self.__enter__()
+
+    def close(self): 
+        self.__exit__()
 
     def recv(self, can_id: int, is_extended_id: bool, timeout_s: int = 0.5) -> any:
         msg = self.bus.recv(timeout=timeout_s) 
@@ -57,13 +75,9 @@ class USB2CANX2(Transport):
             print(f"Failed to write CAN-ID: {can_id}")
             return False
         return True
-    
-    def open_channel(self, channel: str):
-        os.system(f'sudo ifconfig {channel} up')
 
-    def close_channel(self, channel: str): 
-        os.system(f'sudo ifconfig {channel} down')
-        self.bus.shutdown()
+    # def __del__(self):
+    #     self.__exit__()
 
 if __name__ == "__main__":
     usb2can = USB2CANX2(channel="can1", baud_rate=10000)

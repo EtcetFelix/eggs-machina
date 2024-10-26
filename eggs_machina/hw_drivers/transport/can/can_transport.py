@@ -1,5 +1,7 @@
 from ctypes import *
 import time
+from types import TracebackType
+from typing import Optional, Type
 
 from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
@@ -10,16 +12,29 @@ class PCAN(Transport):
         self.channel = channel
         self.baud_rate = baud_rate
 
-        pcan_baud_rate: PCANBasic.TPCANBaudrate = PCANBasic.PCAN_BAUD_1M
+        self.pcan_baud_rate: PCANBasic.TPCANBaudrate = PCANBasic.PCAN_BAUD_1M
         if baud_rate == CAN_Baud_Rate.CAN_BAUD_125_KBS:
-            pcan_baud_rate = PCANBasic.PCAN_BAUD_125K
+            self.pcan_baud_rate = PCANBasic.PCAN_BAUD_125K
         elif baud_rate == CAN_Baud_Rate.CAN_BAUD_250_KBS:
-            pcan_baud_rate = PCANBasic.PCAN_BAUD_250K
+            self.pcan_baud_rate = PCANBasic.PCAN_BAUD_250K
         elif baud_rate == CAN_Baud_Rate.CAN_BAUD_500_KBS:
-            pcan_baud_rate = PCANBasic.PCAN_BAUD_500K
+            self.pcan_baud_rate = PCANBasic.PCAN_BAUD_500K
 
+    def __enter__(self):
         self.transport = PCANBasic.PCANBasic()
-        self.transport.Initialize(channel, pcan_baud_rate)        
+        self.transport.Initialize(self.channel, self.pcan_baud_rate) 
+
+    def __exit__(self, exctype: Optional[Type[BaseException]],
+        excinst: Optional[BaseException],
+        exctb: Optional[TracebackType]
+    ) -> bool:
+        self.transport.Uninitialize(self.channel)
+
+    def open(self):
+        self.__enter__()
+        
+    def close(self):
+        self.__exit__()
 
     def recv(self, can_id: int, is_extended_id: bool = False, timeout_s: int = 0.5) -> CAN_Message:
         msg_type = PCANBasic.PCAN_MESSAGE_STANDARD
@@ -92,4 +107,4 @@ class PCAN(Transport):
         return True    
 
     def __del__(self):
-        self.transport.Uninitialize(self.channel)
+        self.__exit__()
