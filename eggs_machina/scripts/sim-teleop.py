@@ -29,8 +29,12 @@ def set_position(leader: RoboRob, model, data):
     data.qpos = mapped_joint_positions 
 
 
-def get_real_robot_pos(leader: Robstride):
-    pos = leader.read_single_param()
+def get_real_robot_pos(leader: RoboRob):
+    pos = leader.read_position()
+    return pos
+
+def get_sim_robot_pos(data):
+    pos = data.qpos
     return pos
 
 def map_joint_positions(positions: Dict[Robstride, float]):
@@ -68,13 +72,15 @@ def instantiate_robots(data, model) -> List[Any]:
     return [leader, follower]
 
 
-def teleop(leader: Robstride, follower: Robstride, model, data):
+def teleop(leader: RoboRob, follower: Robstride, model, data):
     """Start tele-operation."""
     with mujoco.viewer.launch_passive(model, data) as viewer:
         while viewer.is_running():
             step_start = time.time()
             set_position(leader, model, data)
             mujoco.mj_step(model, data)
+            print(f"real robot pos: {get_real_robot_pos(leader)}")
+            print(f"sim robot pos: {get_sim_robot_pos(data)}")
             viewer.sync()
             # Rudimentary time keeping, will drift relative to wall clock.
             time_until_next_step = model.opt.timestep - (time.time() - step_start)
