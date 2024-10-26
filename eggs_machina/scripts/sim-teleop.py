@@ -64,7 +64,7 @@ def shutdown_robots_gracefully(robots: List[Any]):
 
 
 if __name__ == "__main__":
-    m = mujoco.MjModel.from_xml_path('simulation/low_cost_robot/scene.xml')
+    m = mujoco.MjModel.from_xml_path('C:/code_repos/eggs-machina/eggs_machina/model/meshes/assembly.urdf')
     d = mujoco.MjData(m)
     robots = instantiate_robots(d, m)
     leader = robots[0]
