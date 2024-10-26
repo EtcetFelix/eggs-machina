@@ -1,0 +1,124 @@
+<?xml version="1.0" ?>
+<robot name="assembly">
+  <link name="base">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+  <joint name="floating_base" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base"/>
+    <child link="RS_01_Rotor"/>
+  </joint>
+  <link name="RS_01_Rotor">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Rotor.stl"/>
+      </geometry>
+      <material name="RS_01_Rotor_material">
+        <color rgba="0.23137255 0.38039216 0.70588235 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Rotor.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.7571451900000001"/>
+      <inertia ixx="0.001176645641032968" iyy="0.01854663448975871" izz="0.019112014371822254" ixy="0.0002965141590615316" ixz="-0.0005855090493464634" iyz="4.3072809418566064e-05"/>
+      <origin xyz="0.24381639263867638 0.026581957712590514 0.0018812767931817931" rpy="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="Revolute-rob2" type="revolute">
+    <origin xyz="7.9372476e-05 0 -7.648864e-05" rpy="1.5707963 0 0"/>
+    <parent link="RS_01_Rotor"/>
+    <child link="RS_01_Stator"/>
+    <limit effort="80" velocity="5" lower="0" upper="6"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+  <link name="RS_01_Stator">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Stator.stl"/>
+      </geometry>
+      <material name="RS_01_Stator_material">
+        <color rgba="0.64705882 0.64705882 0.64705882 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Stator.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.4118815100000002"/>
+      <inertia ixx="0.0017838062536384824" iyy="0.0007383653459950936" izz="0.002155788340321322" ixy="6.914359559157729e-06" ixz="2.82203165241214e-06" iyz="8.826193453001782e-05"/>
+      <origin xyz="-8.921886788884492e-05 -0.008805795250571498 0.01995713144486881" rpy="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="Revolute-rob1" type="revolute">
+    <origin xyz="0.00021297737 -0.09512682 0.02689800040862217" rpy="1.5707963999999994 4.641020678874952e-08 -3.141592653589792"/>
+    <parent link="RS_01_Stator"/>
+    <child link="RS_01_Stator_2"/>
+    <limit effort="80" velocity="5" lower="0" upper="6"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+  <link name="RS_01_Stator_2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Stator_2.stl"/>
+      </geometry>
+      <material name="RS_01_Stator_material_2">
+        <color rgba="0.64705882 0.64705882 0.64705882 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Stator_2.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.82981498"/>
+      <inertia ixx="0.003447477733869174" iyy="0.0034336912616858115" izz="0.006004219302821596" ixy="-2.2636207772437855e-06" ixz="2.064376446282922e-06" iyz="5.174763510332199e-07"/>
+      <origin xyz="2.162658737066271e-05 7.481511817518568e-05 -0.027150898031732783" rpy="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="Revolute-rob3" type="revolute">
+    <origin xyz="0.29425767043217144 0.02288570915392272 0.021934098980723373" rpy="-3.1415926 2.220446049250313e-15 7.1795869249768884e-09"/>
+    <parent link="RS_01_Rotor"/>
+    <child link="RS_01_Rotor_2"/>
+    <limit effort="80" velocity="5" lower="0" upper="6"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="RS_01_Rotor_2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Rotor_2.stl"/>
+      </geometry>
+      <material name="RS_01_Rotor_material_2">
+        <color rgba="0.23137255 0.38039216 0.70588235 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/RS_01_Rotor_2.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.11913305"/>
+      <inertia ixx="1.6973167e-05" iyy="1.6967284e-05" izz="1.5469864e-05" ixy="0" ixz="0" iyz="0"/>
+      <origin xyz="-7.9372476e-05 7.648864e-05 0" rpy="0 0 0"/>
+    </inertial>
+  </link>
+</robot>
