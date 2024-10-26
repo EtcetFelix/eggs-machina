@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Any, List
+from typing import Any, List, Dict
 import time
 import mujoco
 import mujoco.viewer
@@ -8,47 +8,77 @@ from eggs_machina.hw_drivers.system.robstride.robstride import Robstride
 from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
+from eggs_machina.hw_drivers.transport.can.usb2can_x2 import USB2CANX2
+from eggs_machina.utils.robstride_robot import RoboRob
 from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackResp, Robstride_Fault_Enum, Robstride_Fault_Frame_Enum, Robstride_Motor_Mode_Enum, Robstride_Msg_Enum, Robstride_Param_Enum
 import time
 from eggs_machina.simulation.interface import SimulatedRobot
 
-def set_position(leader: Robstride, follower: Robstride):
-    pos = leader.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
-    follower.write_single_param(Robstride_Param_Enum.POSITION_MODE_ANGLE_CMD, pos)
+LEADER_SERVO_IDS = [44, 42]
+SIM_MAPPING = {
+    LEADER_SERVO_IDS[0]: 1,
+    LEADER_SERVO_IDS[1]: 0
+}
+HOST_ID = 0xFD
+
+
+
+def set_position(leader: RoboRob, model, data):
+    pos = leader.read_position()
+    mapped_joint_positions = map_joint_positions(pos)
+    data.qpos[:] = mapped_joint_positions 
 
 
 def get_real_robot_pos(leader: Robstride):
-    pos = leader.read_single_param(Robstride_Param_Enum.MECH_POS_END_COIL)
+    pos = leader.read_single_param()
+    return pos
 
-def map_joint_positions(real_robot_joint_positions):
-    mujoco_joint_positions = [] 
-    return real_robot_joint_positions
+def map_joint_positions(positions: Dict[Robstride, float]):
+    """Map the real world joints to the sim joints.
+    
+    The order of positions of the sim joints is determined by the order 
+    in which the joints appear in the urdf. 
+    """
+    sim_joint_positions = [None for _ in range(len(SIM_MAPPING))]
+    for real_servo, position in positions.items():
+        sim_joint_index = SIM_MAPPING[real_servo.motor_can_id]
+        sim_joint_positions[sim_joint_index] = position
+    for index, pos in enumerate(sim_joint_positions):
+        if pos == None:
+            raise KeyError(f"Sim joint with index {index} was not assigned a position.")
+    sim_joint_positions.append(0)
+    return sim_joint_positions
 
 def instantiate_robots(data, model) -> List[Any]:
     """Define and instantiate all robots used during teleop."""
-    transport =  can_transport.PCAN(channel=PCANBasic.PCAN_USBBUS2, baud_rate=can_transport.CAN_Baud_Rate.CAN_BAUD_1_MBS)
-    host_can_id = 150
-    # TODO: set control mode to position
-    # TODO: enable motor
-    leader = Robstride(transport, host_can_id, motor_can_id=127)
+    transport = USB2CANX2(channel="can0", baud_rate=1000000)
+    leader_servos = {}
+    for can_id in LEADER_SERVO_IDS:
+        leader_servos[can_id] = Robstride(host_can_id=HOST_ID, motor_can_id=can_id, can_transport=transport)
+    leader = RoboRob(leader_servos)
     follower = SimulatedRobot(model, data)
-    leader.stop_motor()
-    # set_position(leader, follower)
+    leader.stop_motors()
+    time.sleep(1)
+
+    print(leader.read_position())
+
+    leader.stop_motors()
+    time.sleep(0.05)   
+    set_position(leader, model, data)
     time.sleep(1)
     return [leader, follower]
 
+
 def teleop(leader: Robstride, follower: Robstride, model, data):
     """Start tele-operation."""
-    with mujoco.viewer.launch_passive(m, d) as viewer:
+    with mujoco.viewer.launch_passive(model, data) as viewer:
         while viewer.is_running():
             step_start = time.time()
-            real_robot_joint_positions = get_real_robot_pos(leader)
-            mapped_joint_positions = map_joint_positions(real_robot_joint_positions)
-            d.qpos[:] = mapped_joint_positions  
-            mujoco.mj_step(m, d)
+            set_position(leader, model, data)
+            mujoco.mj_step(model, data)
             viewer.sync()
             # Rudimentary time keeping, will drift relative to wall clock.
-            time_until_next_step = m.opt.timestep - (time.time() - step_start)
+            time_until_next_step = model.opt.timestep - (time.time() - step_start)
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
 
@@ -64,7 +94,7 @@ def shutdown_robots_gracefully(robots: List[Any]):
 
 
 if __name__ == "__main__":
-    m = mujoco.MjModel.from_xml_path('C:/code_repos/eggs-machina/eggs_machina/model/meshes/assembly.urdf')
+    m = mujoco.MjModel.from_xml_path('/home/abohannon/code_repos/eggs-machina/eggs_machina/model/meshes/assembly.urdf')
     d = mujoco.MjData(m)
     robots = instantiate_robots(d, m)
     leader = robots[0]
