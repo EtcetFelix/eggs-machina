@@ -38,7 +38,7 @@
     <origin xyz="7.9372476e-05 0 -7.648864e-05" rpy="1.5707963 0 0"/>
     <parent link="RS_01_Rotor"/>
     <child link="RS_01_Stator"/>
-    <limit effort="80" velocity="5" lower="0" upper="0"/>
+    <limit effort="80" velocity="5" lower="0" upper="6"/>
     <axis xyz="0 0 -1"/>
   </joint>
   <link name="RS_01_Stator">
@@ -67,7 +67,7 @@
     <origin xyz="0.00021297737 -0.09512682 0.02689800040862217" rpy="1.5707963999999994 4.641020678874952e-08 -3.141592653589792"/>
     <parent link="RS_01_Stator"/>
     <child link="RS_01_Stator_2"/>
-    <limit effort="80" velocity="5" lower="0" upper="0"/>
+    <limit effort="80" velocity="5" lower="0" upper="6"/>
     <axis xyz="0 0 -1"/>
   </joint>
   <link name="RS_01_Stator_2">
@@ -96,7 +96,7 @@
     <origin xyz="0.29425767043217144 0.02288570915392272 0.021934098980723373" rpy="-3.1415926 2.220446049250313e-15 7.1795869249768884e-09"/>
     <parent link="RS_01_Rotor"/>
     <child link="RS_01_Rotor_2"/>
-    <limit effort="80" velocity="5" lower="0" upper="0"/>
+    <limit effort="80" velocity="5" lower="0" upper="6"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="RS_01_Rotor_2">
