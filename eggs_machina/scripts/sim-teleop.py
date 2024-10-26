@@ -14,19 +14,19 @@ from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackRes
 import time
 from eggs_machina.simulation.interface import SimulatedRobot
 
-LEADER_SERVO_IDS = [44, 42]
+LEADER_SERVO_IDS = [44, 42, 30]
 SIM_MAPPING = {
     LEADER_SERVO_IDS[0]: 1,
-    LEADER_SERVO_IDS[1]: 0
+    LEADER_SERVO_IDS[1]: 0,
+    LEADER_SERVO_IDS[2]: 2
 }
 HOST_ID = 0xFD
-
 
 
 def set_position(leader: RoboRob, model, data):
     pos = leader.read_position()
     mapped_joint_positions = map_joint_positions(pos)
-    data.qpos[:] = mapped_joint_positions 
+    data.qpos = mapped_joint_positions 
 
 
 def get_real_robot_pos(leader: Robstride):
@@ -46,7 +46,6 @@ def map_joint_positions(positions: Dict[Robstride, float]):
     for index, pos in enumerate(sim_joint_positions):
         if pos == None:
             raise KeyError(f"Sim joint with index {index} was not assigned a position.")
-    sim_joint_positions.append(0)
     return sim_joint_positions
 
 def instantiate_robots(data, model) -> List[Any]:
