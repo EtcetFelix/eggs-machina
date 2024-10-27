@@ -100,3 +100,28 @@ def save_to_hdf5(
             dataset = root[name]
             dataset[...] = array # type: ignore
     print(f"Saving: {time.time() - t0:.1f} secs")
+
+
+def load_hdf5(dataset_dir, dataset_name, values_to_load: List[DataSaved]):
+    dataset_path = os.path.join(dataset_dir, dataset_name + '.hdf5')
+    if not os.path.isfile(dataset_path):
+        print(f'Dataset does not exist at \n{dataset_path}\n')
+        exit()
+
+    qpos, qvel, effort, action, image_dict = None, None, None, None, None
+    with h5py.File(dataset_path, 'r') as root:
+        is_sim = root.attrs['sim']
+        if DataSaved.FOLLOWER_POSITION in values_to_load:
+            qpos = root[FOLLOWER_POSITION_HDF5_GROUP][()]
+        if DataSaved.FOLLOWER_VELOCITY in values_to_load:
+            qvel = root[FOLLOWER_VELOCITY_HDF5_GROUP][()]
+        if DataSaved.FOLLOWER_EFFORT in values_to_load:
+            effort = root[FOLLOWER_EFFORT_HDF5_GROUP][()]
+        if DataSaved.LEADER_ACTION in values_to_load:
+            action = root[LEADER_ACTION_HDF5_GROUP][()]
+        if DataSaved.IMAGES in values_to_load:
+            image_dict = dict()
+            for cam_name in root[IMAGES_HDF5_GROUP].keys():
+                image_dict[cam_name] = root[f'{IMAGES_HDF5_GROUP}{cam_name}'][()]
+
+    return qpos, qvel, effort, action, image_dict
