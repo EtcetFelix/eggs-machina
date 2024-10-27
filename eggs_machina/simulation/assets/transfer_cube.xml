@@ -1,0 +1,7 @@
+<mujoco>
+    <include file="scene.xml"/>
+    <include file="model/meshes/assembly.xml"/> 
+    <!-- <worldbody>
+        
+    </worldbody> -->
+</mujoco>
