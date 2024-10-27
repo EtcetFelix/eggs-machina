@@ -12,6 +12,12 @@ class TransferCubeTask(base.Task):
     def __init__(self, random=None):
         super().__init__(random=random)
         self.max_reward = 4
+    
+    def before_step(self, action, physics):
+        """Define the environment action to take."""
+        robot_action = action
+        super().before_step(robot_action, physics)
+        return
 
     def initialize_episode(self, physics):
         """Sets the state of the environment at the start of each episode."""
@@ -19,18 +25,17 @@ class TransferCubeTask(base.Task):
 
     def get_observation(self, physics):
         obs = collections.OrderedDict()
-        obs['qpos'] = self.get_qpos(physics)
+        self.get_qpos(physics)
         return obs
+    
+    @staticmethod
+    def get_qpos(physics):
+        pass
+
     
     def get_reward(self, physics):
         # return whether left gripper is holding the box
         return 0
-    
-    @staticmethod
-    def get_qpos(physics):
-        qpos_raw = physics.data.qpos.copy()
-        qpos_raw = qpos_raw[:]
-        return np.concatenate([qpos_raw])
 
 
 def make_sim_env(delta_time: float):

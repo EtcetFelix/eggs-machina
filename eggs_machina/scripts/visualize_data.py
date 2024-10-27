@@ -16,13 +16,19 @@ def load_data(dataset_dir, dataset_name):
     print(qpos)
     return qpos, qvel, effort, action, image_dict
 
-def render_env(images, delta_time):
+def render_episode(images, delta_time):
     cv2.imshow('Environment', images[0])  # Show the first image
     cv2.waitKey(500)
     for image in images:
         cv2.imshow('Environment', image)
         cv2.waitKey(int(delta_time * 1000))  # Wait for the calculated time in milliseconds
     cv2.destroyAllWindows()
+
+def render_env(env):
+    pixels = env.physics.render()
+    plt.imshow(pixels)
+    plt.axis('off')  # Hide axes
+    plt.show()
     
  
 def main():
@@ -39,9 +45,12 @@ def main():
     episode_replay = [ts]
     images=[]
     for action in actions:
+        print(action)
+        # ts = env.step(action)
         ts = env.step(action)
+        render_env(env)
         images.append(env.physics.render())
-    render_env(images, delta_time)
+    render_episode(images, delta_time)
     print("done")
         
     
