@@ -1,8 +1,10 @@
 import os
+import pathlib
 
 DELTA_TIME_STEP = 0.02
 
 DATA_DIR = os.getenv("DATA_DIR", default="~/.eggs_machina/data")
+XML_DIR = str(pathlib.Path(__file__).parent.resolve()) + '/simulation/assets/'
 
 TASK_CONFIGS = {
     "crack_an_egg": {
