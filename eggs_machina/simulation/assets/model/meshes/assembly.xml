@@ -1,4 +1,4 @@
-<mujoco model="assembly">
+<mujocoinclude>
   <option iterations="50" timestep="0.001" solver="PGS" gravity="0 0 -9.81" />
 
   <compiler angle="radian" meshdir="meshes" eulerseq="zyx" autolimits="true" />
@@ -18,15 +18,15 @@
     <mesh name="RS_01_Stator" file="RS_01_Stator.stl" />
     <mesh name="RS_01_Stator_2" file="RS_01_Stator_2.stl" />
     <mesh name="RS_01_Rotor_2" file="RS_01_Rotor_2.stl" />
-    <texture name="texplane" type="2d" builtin="checker" rgb1=".0 .0 .0" rgb2=".8 .8 .8" width="100" height="100" />
-    <material name="matplane" reflectance="0." texture="texplane" texrepeat="1 1" texuniform="true" />
+    <!-- <texture name="texplane" type="2d" builtin="checker" rgb1=".0 .0 .0" rgb2=".8 .8 .8" width="100" height="100" /> -->
+    <!-- <material name="matplane" reflectance="0." texture="texplane" texrepeat="1 1" texuniform="true" /> -->
     <material name="visualgeom" rgba="0.5 0.9 0.2 1" />
   </asset>
 
   <worldbody>
     <light directional="true" diffuse="0.4 0.4 0.4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1" castshadow="false" />
     <light directional="true" diffuse="0.6 0.6 0.6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
-    <geom name="ground" type="plane" pos="0 0 0" size="100 100 0.001" quat="1 0 0 0" material="matplane" condim="3" conaffinity="15" />
+    <!-- <geom name="ground" type="plane" pos="0 0 0" size="100 100 0.001" quat="1 0 0 0" material="matplane" condim="3" conaffinity="15" /> -->
     <camera name="fixed" pos="0 -3.0 0.5" xyaxes="1 0 0 0 0 1" />
     <camera name="track" mode="trackcom" pos="0 -3.0 0.5" xyaxes="1 0 0 0 0 1" />
     <body name="root" pos="0 0 0.01" quat="1 0 0 0">
@@ -36,19 +36,19 @@
       <geom type="mesh" rgba="0.231373 0.380392 0.705882 1" mesh="RS_01_Rotor" />
       <body name="RS_01_Stator" pos="7.93725e-05 0 -7.64886e-05" quat="0.707107 0.707107 0 0">
         <inertial pos="-8.92189e-05 -0.0088058 0.0199571" quat="0.515906 0.487995 -0.480535 0.514576" mass="1.41188" diaginertia="0.00216129 0.00178382 0.000732847" />
-        <joint name="Revolute-rob2" pos="0 0 0" axis="0 0 -1" actuatorfrcrange="-80 80" />
+        <joint name="Revolute-rob2" pos="0 0 0" axis="0 0 -1" actuatorfrcrange="-80 80" range="0 3"/>
         <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="RS_01_Stator" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
         <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="RS_01_Stator" />
         <body name="RS_01_Stator_2" pos="0.000212977 -0.0951268 0.026898" quat="-1.64085e-08 1.64085e-08 -0.707107 -0.707107">
           <inertial pos="2.16266e-05 7.48151e-05 -0.0271509" quat="0.538321 0.458928 -0.537794 0.458665" mass="1.82981" diaginertia="0.00600422 0.00344784 0.00343333" />
-          <joint name="Revolute-rob1" pos="0 0 0" axis="0 0 -1" actuatorfrcrange="-80 80" />
+          <joint name="Revolute-rob1" pos="0 0 0" axis="0 0 -1" actuatorfrcrange="-80 80" range="0 6"/>
           <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="RS_01_Stator_2" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
           <geom type="mesh" rgba="0.647059 0.647059 0.647059 1" mesh="RS_01_Stator_2" />
         </body>
       </body>
       <body name="RS_01_Rotor_2" pos="0.294258 0.0228857 0.0219341" quat="2.67949e-08 -1 -3.58979e-09 0">
         <inertial pos="-7.93725e-05 7.64886e-05 0" mass="0.119133" diaginertia="1.69732e-05 1.69673e-05 1.54699e-05" />
-        <joint name="Revolute-rob3" pos="0 0 0" axis="0 0 1" actuatorfrcrange="-80 80" />
+        <joint name="Revolute-rob3" pos="0 0 0" axis="0 0 1" actuatorfrcrange="-80 80" range="0 6"/>
         <geom type="mesh" rgba="0.231373 0.380392 0.705882 1" mesh="RS_01_Rotor_2" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
         <geom type="mesh" rgba="0.231373 0.380392 0.705882 1" mesh="RS_01_Rotor_2" />
       </body>
@@ -56,15 +56,15 @@
   </worldbody>
 
   <actuator>
-    <motor name="Revolute-rob2" joint="Revolute-rob2" ctrllimited="true" ctrlrange="-80 80" gear="1" />
+    <motor name="Revolute-rob2-actuator" joint="Revolute-rob2" ctrllimited="true" ctrlrange="0 80" gear="1" />
     <motor name="Revolute-rob1" joint="Revolute-rob1" ctrllimited="true" ctrlrange="-80 80" gear="1" />
     <motor name="Revolute-rob3" joint="Revolute-rob3" ctrllimited="true" ctrlrange="-80 80" gear="1" />
   </actuator>
 
   <sensor>
-    <actuatorpos name="Revolute-rob2_p" actuator="Revolute-rob2" />
-    <actuatorvel name="Revolute-rob2_v" actuator="Revolute-rob2" />
-    <actuatorfrc name="Revolute-rob2_f" actuator="Revolute-rob2" noise="0.001" />
+    <actuatorpos name="Revolute-rob2_p" actuator="Revolute-rob2-actuator" />
+    <actuatorvel name="Revolute-rob2_v" actuator="Revolute-rob2-actuator" />
+    <actuatorfrc name="Revolute-rob2_f" actuator="Revolute-rob2-actuator" noise="0.001" />
     <actuatorpos name="Revolute-rob1_p" actuator="Revolute-rob1" />
     <actuatorvel name="Revolute-rob1_v" actuator="Revolute-rob1" />
     <actuatorfrc name="Revolute-rob1_f" actuator="Revolute-rob1" noise="0.001" />
@@ -74,4 +74,4 @@
     <framequat name="orientation" objtype="site" noise="0.001" objname="imu" />
     <gyro name="angular-velocity" site="imu" noise="0.005" cutoff="34.9" />
   </sensor>
-</mujoco>
+</mujocoinclude>
