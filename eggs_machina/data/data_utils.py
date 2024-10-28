@@ -68,6 +68,7 @@ def save_to_hdf5(
     dataset_path: str,
     camera_names: List[str],
     max_timesteps: int,
+    values_to_save: List[DataSaved]
 ):
     """Save data_dict to HDF5 file at dataset_path."""
     # HDF5
@@ -75,22 +76,52 @@ def save_to_hdf5(
     with h5py.File(dataset_path, "w", rdcc_nbytes=1024**2 * 2) as root:
         root.attrs["sim"] = False
         obs = root.create_group("observations")
-        image = obs.create_group(DataSaved.IMAGES.value)
-        for cam_name in camera_names:
-            _ = image.create_dataset(
-                cam_name,
-                (max_timesteps, 480, 640, 3),
-                dtype="uint8",
-                chunks=(1, 480, 640, 3),
-            )
-            # compression='gzip',compression_opts=2,)
-            # compression=32001, compression_opts=(0, 0, 0, 0, 9, 1, 1), shuffle=False)
-        _ = obs.create_dataset(DataSaved.FOLLOWER_POSITION.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
-        _ = obs.create_dataset(DataSaved.FOLLOWER_VELOCITY.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
-        _ = obs.create_dataset(DataSaved.FOLLOWER_EFFORT.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
-        _ = root.create_dataset(DataSaved.LEADER_ACTION.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
+        if DataSaved.IMAGES in values_to_save:
+            image = obs.create_group(DataSaved.IMAGES.value)
+            for cam_name in camera_names:
+                _ = image.create_dataset(
+                    cam_name,
+                    (max_timesteps, 480, 640, 3),
+                    dtype="uint8",
+                    chunks=(1, 480, 640, 3),
+                )
+                # compression='gzip',compression_opts=2,)
+                # compression=32001, compression_opts=(0, 0, 0, 0, 9, 1, 1), shuffle=False)
+        if DataSaved.FOLLOWER_POSITION in values_to_save:
+            _ = obs.create_dataset(DataSaved.FOLLOWER_POSITION.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
+        if DataSaved.FOLLOWER_VELOCITY in values_to_save: 
+            _ = obs.create_dataset(DataSaved.FOLLOWER_VELOCITY.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
+        if DataSaved.FOLLOWER_EFFORT in values_to_save:
+            _ = obs.create_dataset(DataSaved.FOLLOWER_EFFORT.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
+        if DataSaved.LEADER_ACTION in values_to_save:
+            _ = root.create_dataset(DataSaved.LEADER_ACTION.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
 
         for name, array in data_dict.items():
             dataset = root[name]
             dataset[...] = array # type: ignore
     print(f"Saving: {time.time() - t0:.1f} secs")
+
+
+def load_hdf5(dataset_dir, dataset_name, values_to_load: List[DataSaved]):
+    dataset_path = os.path.join(dataset_dir, dataset_name + '.hdf5')
+    if not os.path.isfile(dataset_path):
+        print(f'Dataset does not exist at \n{dataset_path}\n')
+        exit()
+
+    qpos, qvel, effort, action, image_dict = None, None, None, None, None
+    with h5py.File(dataset_path, 'r') as root:
+        is_sim = root.attrs['sim']
+        if DataSaved.FOLLOWER_POSITION in values_to_load:
+            qpos = root[FOLLOWER_POSITION_HDF5_GROUP][()]
+        if DataSaved.FOLLOWER_VELOCITY in values_to_load:
+            qvel = root[FOLLOWER_VELOCITY_HDF5_GROUP][()]
+        if DataSaved.FOLLOWER_EFFORT in values_to_load:
+            effort = root[FOLLOWER_EFFORT_HDF5_GROUP][()]
+        if DataSaved.LEADER_ACTION in values_to_load:
+            action = root[LEADER_ACTION_HDF5_GROUP][()]
+        if DataSaved.IMAGES in values_to_load:
+            image_dict = dict()
+            for cam_name in root[IMAGES_HDF5_GROUP].keys():
+                image_dict[cam_name] = root[f'{IMAGES_HDF5_GROUP}{cam_name}'][()]
+
+    return qpos, qvel, effort, action, image_dict
