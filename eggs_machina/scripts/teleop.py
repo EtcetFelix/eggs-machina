@@ -17,10 +17,10 @@ from eggs_machina.utils.teleop import Teleoperator
 LEADER_CHANNEL = "can0"
 FOLLOWER_CHANNEL = "can0"
 
-LEADER_SERVO_IDS = [42, 44]
-FOLLOWER_SERVO_IDS = [50, 40]
+LEADER_SERVO_IDS = [50, 40, 23]
+FOLLOWER_SERVO_IDS = [42, 44, 30]
 
-JOINT_MAPPING = {44:50, 42:40}
+JOINT_MAPPING = {44:50, 42:40, 23:30}
 
 HOST_ID = 0xFD
 
@@ -154,22 +154,26 @@ if __name__ == "__main__":
     host_id = 0xFD
 
     # Follower motors
-    follower_x = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=40)
-    follower_y = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=50)
+    follower_x = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=44)
+    follower_y = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=42)
+    # follower_z = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=30)
     follower_robot = RoboRob(
         servos={
             follower_x.motor_can_id: follower_x,
-            follower_y.motor_can_id: follower_y
+            follower_y.motor_can_id: follower_y,
+            # follower_z.motor_can_id: follower_z
         }
     )
 
     # Leader motors
-    leader_x = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=42)
-    leader_y = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=44)
+    leader_x = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=50)
+    leader_y = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=40)
+    # leader_z = Robstride(can_transport=transport, host_can_id=host_id, motor_can_id=23)
     leader_robot = RoboRob(
         servos={
             leader_x.motor_can_id: leader_x,
-            leader_y.motor_can_id: leader_y
+            leader_y.motor_can_id: leader_y,
+            # leader_z.motor_can_id: leader_z
         }
     )
 
@@ -178,7 +182,8 @@ if __name__ == "__main__":
         follower=follower_robot,
         joint_map={
             leader_x: follower_x,
-            leader_y: follower_y
+            leader_y: follower_y,
+            # leader_z: follower_z
         }
     )
 

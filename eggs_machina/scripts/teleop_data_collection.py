@@ -18,6 +18,7 @@ from eggs_machina.data.data_utils import prepare_data_for_export, create_dataset
 DATASET_DIR = "/home/abohannon/Desktop"
 DATASET_FILENAME = "ACT_DATA.hdf5"
 JSON_DUMP_FILENAME = "ACT_DATA.json"
+WITH_CAMERAS = False
 
 
 if __name__ == "__main__":
@@ -54,7 +55,8 @@ if __name__ == "__main__":
         joint_map={
             leader_x: follower_x,
             leader_y: follower_y
-        }
+        },
+        with_cameras=WITH_CAMERAS
     )
 
     # teleoperator.run(delay_ms=0.05)
@@ -66,7 +68,8 @@ if __name__ == "__main__":
     teleoperator.stop()
 
     data_dict = prepare_data_for_export([], leader_actions, timesteps)
-    save_to_json(data_dict, json_data_dump_path)
+    if not WITH_CAMERAS:
+        save_to_json(data_dict, json_data_dump_path)
 
 
     save_to_hdf5(data_dict, dataset_path, [], 100)
