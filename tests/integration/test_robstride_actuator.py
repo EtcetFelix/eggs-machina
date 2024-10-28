@@ -6,11 +6,12 @@ import time
 
 
 CAN_CHANNEL = "can0"
-MOTOR_ID = 127
+MOTOR_ID = 50
+MOTOR_IDS = [50, 40, 23, 44, 42, 30]
 
-def test_get_vbus():
+def test_get_vbus(motor_id):
     with USB2CANX2(channel=CAN_CHANNEL, baud_rate=1000000) as transport:
-        robstride = Robstride(host_can_id=0xFD, motor_can_id=MOTOR_ID, can_transport=transport)
+        robstride = Robstride(host_can_id=0xFD, motor_can_id=motor_id, can_transport=transport)
         bus_voltage = robstride.read_single_param(Robstride_Param_Enum.VBUS_VOLTAGE)
         print(bus_voltage)
         assert bus_voltage is not None, "Failed to read bus_voltage. Check can channel, power, transport device, or device id."
@@ -54,8 +55,9 @@ def test_set_motor_id():
         robstride.set_motor_can_id(new_can_id)
 
 if __name__ == "__main__":
-    test_get_vbus()
-    test_read_run_mode()
-    test_position_max_speed_limit()
-    test_read_position()
+    for id in MOTOR_IDS:
+        test_get_vbus(id)
+    # test_read_run_mode()
+    # test_position_max_speed_limit()
+    # test_read_position()
     # test_set_motor_id()
