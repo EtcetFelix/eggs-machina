@@ -3,6 +3,7 @@ import cv2
 from cv2.typing import NumPyArrayNumeric
 from numpy import dtype, floating, integer
 from numpy.typing import NDArray
+import time
 
 class CameraNotOpenedError(Exception):
     """Raised when the camera could not be opened."""
@@ -62,3 +63,32 @@ class ImageCollector:
             camera.release()
         self.cameras.clear()
         cv2.destroyAllWindows()
+
+
+def get_image_from_camera():
+    cam = cv2.VideoCapture(4)  # 0 usually refers to the default camera
+    # Read a frame from the camera
+    result, image = cam.read()
+    if result:
+        return image
+    else:
+        print("Error: Could not capture image from camera.")
+
+
+def display_image(image):
+    cv2.imshow("Camera Image", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    
+
+if __name__ == "__main__":
+    # image = get_image_from_camera()
+    # display_image(image)
+    image_collector = ImageCollector({"main_cam": 4})
+    image_collector.start_cameras()
+    images = image_collector.get_images()
+    for camera_name, image in images.items():
+        display_image(image) 
+    time.sleep(5)
+    image_collector.close_cameras()
