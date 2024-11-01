@@ -58,6 +58,11 @@ def test_set_motor_id():
         robstride = Robstride(host_can_id=0xFD, motor_can_id=old_can_id, can_transport=transport)
         robstride.set_motor_can_id(new_can_id)
 
+def test_set_0_position(motor_id):
+    with USB2CANX2(channel=CAN_CHANNEL, baud_rate=1000000) as transport:
+        robstride = Robstride(host_can_id=0xFD, motor_can_id=motor_id, can_transport=transport)
+        robstride.set_curr_position_zero()
+
 if __name__ == "__main__":
     for id in MOTOR_IDS:
         test_get_vbus(id)
@@ -65,3 +70,4 @@ if __name__ == "__main__":
     # test_position_max_speed_limit()
     # test_read_position()
     # test_set_motor_id()
+    # test_set_0_position(40)
