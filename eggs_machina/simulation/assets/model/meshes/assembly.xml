@@ -29,7 +29,7 @@
     <!-- <geom name="ground" type="plane" pos="0 0 0" size="100 100 0.001" quat="1 0 0 0" material="matplane" condim="3" conaffinity="15" /> -->
     <camera name="fixed" pos="0 -3.0 0.5" xyaxes="1 0 0 0 0 1" />
     <camera name="track" mode="trackcom" pos="0 -3.0 0.5" xyaxes="1 0 0 0 0 1" />
-    <body name="root" pos="0 0 0.01" quat="1 0 0 0">
+    <body name="root" pos="0 0 0.14" quat="1 0 0 0">
       <freejoint name="root" />
       <site name="imu" size="0.01" pos="0 0 0" />
       <geom type="mesh" rgba="0.231373 0.380392 0.705882 1" mesh="RS_01_Rotor" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
