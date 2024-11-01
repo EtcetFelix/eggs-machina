@@ -73,7 +73,7 @@ class Robstride(System):
     def _retry_read(self, response_id: int):
         """Retry reading a frame when it's empty."""
         param_response_frame = self._read_frame(response_id)
-        attempts_to_try = 7
+        attempts_to_try = 10
         attempts_tried = 1
         while param_response_frame == None and attempts_tried < attempts_to_try:
             param_response_frame = self._read_frame(response_id)
@@ -97,8 +97,8 @@ class Robstride(System):
             try:
                 param_response_frame = self._retry_read(response_id)
             except NoResponseError:
-                raise NoResponseError(f"No response from motor with CAN id: {self.motor_can_id}. 
-                                      CAN frame data expecting response for: {data}")
+                raise NoResponseError(f"No response from motor with CAN id: {self.motor_can_id}. "
+                                      f"CAN frame data expecting response for: {data}")
         return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[4:4+param_data.byte_len])[0]
 
 
