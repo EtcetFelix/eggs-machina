@@ -7,7 +7,11 @@ import time
 
 CAN_CHANNEL = "can0"
 MOTOR_ID = 50
-MOTOR_IDS = [50, 40, 23, 44, 42, 30]
+# MOTOR_IDS = [50, 40, 23, 44, 42, 30]
+ARM1_IDS = [44, 42, 30]
+ARM2_IDS = [50, 40, 23]
+MOTOR_IDS = ARM1_IDS + ARM2_IDS
+
 
 def test_get_vbus(motor_id):
     with USB2CANX2(channel=CAN_CHANNEL, baud_rate=1000000) as transport:
