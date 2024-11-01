@@ -8,12 +8,14 @@ from eggs_machina.hw_drivers.system.robstride.robstride_types import FeedbackRes
 from eggs_machina.hw_drivers.transport.can import PCANBasic
 from eggs_machina.hw_drivers.transport.base import Transport
 from eggs_machina.hw_drivers.transport.can import can_transport
+from eggs_machina.hw_drivers.system.exceptions import NoResponseError
 
 from eggs_machina.hw_drivers.system.robstride.constants import ROBSTRIDE_PARMS
 from eggs_machina.hw_drivers.transport.can.types import CAN_Message
 from eggs_machina.hw_drivers.transport.can.usb2can_x2 import USB2CANX2
 
 EMPTY_CAN_FRAME = bytes([0, 0, 0, 0, 0, 0, 0, 0])
+
 
 class Robstride(System):
     def __init__(self,  can_transport: Transport, host_can_id: int, motor_can_id: int):
@@ -76,6 +78,8 @@ class Robstride(System):
         while param_response_frame == None and attempts_tried < attempts_to_try:
             param_response_frame = self._read_frame(response_id)
             attempts_tried += 1
+        if param_response_frame == None:
+            raise NoResponseError
         return param_response_frame
 
     
@@ -90,7 +94,11 @@ class Robstride(System):
         response_id = self.host_can_id | (self.motor_can_id << 8) | (Robstride_Msg_Enum.PARAM_READ.value << 24)
         param_response_frame = self._read_frame(response_id)
         if param_response_frame==None:
-            param_response_frame = self._retry_read(response_id)
+            try:
+                param_response_frame = self._retry_read(response_id)
+            except NoResponseError:
+                raise NoResponseError(f"No response from motor with CAN id: {self.motor_can_id}. 
+                                      CAN frame data expecting response for: {data}")
         return struct.unpack(f"<{param_data.data_type._type_}", param_response_frame[4:4+param_data.byte_len])[0]
 
 
