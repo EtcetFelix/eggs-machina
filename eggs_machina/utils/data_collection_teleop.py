@@ -16,12 +16,15 @@ from eggs_machina.data.image_collection import ImageCollector
 TIMESTEP_LENGTH = 0.05
 
 class DataCollectionTeleop(Teleoperator):
-    def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride], with_cameras: bool=False):
+    def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride], cameras: Dict[str, int], with_cameras: bool=False):
+        """
+        Class to run teleoperation for data collection.
+        
+        :param cameras: keys are the camera name, values are the hardware camera index to use for opencv.
+        """
         super().__init__(leader, follower, joint_map) 
-        camera_names = {"camera1": 4}
-        self.image_collector = ImageCollector(camera_names)
+        self.image_collector = ImageCollector(cameras)
         self.with_cameras = with_cameras
-        # TODO: Add effort (milliamps), and velocity (rads/second)
     
     def run(self, delay_s: int, num_timesteps: int):
         leader_actions = []

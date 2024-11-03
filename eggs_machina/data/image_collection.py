@@ -53,7 +53,6 @@ class ImageCollector:
         if not ret:
             raise FrameNotReadError("Error: Could not read frame.")
 
-        cv2.destroyAllWindows()
         return frame
     
     
