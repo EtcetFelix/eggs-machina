@@ -97,9 +97,13 @@ def save_to_hdf5(
             _ = root.create_dataset(DataSaved.LEADER_ACTION.value, (max_timesteps, TOTAL_NUM_LEADER_JOINTS))
 
         for name, array in data_dict.items():
-            dataset = root[name]
-            dataset[...] = array # type: ignore
+            try:
+                dataset = root[name]
+                dataset[...] = array # type: ignore
+            except KeyError:
+                print(f"{name} not saved to dataset because not in values_to_save")
     print(f"Saving: {time.time() - t0:.1f} secs")
+    print(f"Saved to path {dataset_path}")
 
 
 def load_hdf5(dataset_dir, dataset_name, values_to_load: List[DataSaved]):

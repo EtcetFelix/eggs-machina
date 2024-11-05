@@ -16,17 +16,22 @@ from eggs_machina.data.image_collection import ImageCollector
 TIMESTEP_LENGTH = 0.05
 
 class DataCollectionTeleop(Teleoperator):
-    def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride]):
+    def __init__(self, leader: RoboRob, follower: RoboRob, joint_map: Dict[Robstride, Robstride], cameras: Dict[str, int], with_cameras: bool=False):
+        """
+        Class to run teleoperation for data collection.
+        
+        :param cameras: keys are the camera name, values are the hardware camera index to use for opencv.
+        """
         super().__init__(leader, follower, joint_map) 
-        camera_names = {"camera1": 0, "camera2": 1}
-        self.image_collector = ImageCollector(camera_names)
-        # TODO: Add effort (milliamps), and velocity (rads/second)
+        self.image_collector = ImageCollector(cameras)
+        self.with_cameras = with_cameras
     
     def run(self, delay_s: int, num_timesteps: int):
         leader_actions = []
         timestamp_history = []
         timesteps = []
-        # self.image_collector.start_cameras()
+        if self.with_cameras:
+            self.image_collector.start_cameras()
         for _ in range(num_timesteps):
             t0 = time.time()
             action = self._get_leader_action()
@@ -103,7 +108,8 @@ class DataCollectionTeleop(Teleoperator):
         observation[DataSaved.FOLLOWER_EFFORT.value] = self._get_effort(follower_feedback)
         observation[DataSaved.FOLLOWER_POSITION.value] = self._get_positions(follower_feedback)
         observation[DataSaved.FOLLOWER_VELOCITY.value] = self._get_velocity(follower_feedback)
-        # observation[DataSaved.IMAGES.value] = self._get_images()
+        if self.with_cameras:
+            observation[DataSaved.IMAGES.value] = self._get_images()
         return observation
 
     def get_reward(self) -> Literal[0]:
